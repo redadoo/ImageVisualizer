@@ -2,11 +2,11 @@
 
 ## Overview
 
-ImageVisualizer is a project that aims to create an image visualizer using the ImGui library with a backend implemented in DirectX 11. This tool provides a user-friendly interface for loading and visualizing images, making it easy to inspect and analyze image data.
+ImageVisualizer is a project that aims to create an image visualizer using the ImGui library with a backend implemented in DirectX 11. This tool provides a interface for  visualizing images
 
 ## Features
 
-- **Image Display:** Display images inside a folder in a user-friendly interface
+- **Image Display:** Display images inside a folder 
 
 ## Features in Development
 
