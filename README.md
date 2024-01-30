@@ -13,6 +13,17 @@ ImageVisualizer is a project that aims to create an image visualizer using the I
 - **Real time Displaying:** Display images inside a folder with real time change
 - Zoom
 - Add support for more file type (text file, pdf, video)
+
+## Current file extension supported(using the stb_image.h)
+- JPG 
+- PNG
+- TGA
+- BMP
+- PSD
+- GIF
+- HDR
+- PIC
+
 ## Prerequisites
 Before building and running the project, make sure you have the following prerequisites installed:
 
