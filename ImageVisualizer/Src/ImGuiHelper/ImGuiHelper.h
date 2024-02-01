@@ -17,5 +17,5 @@ namespace ImGuiHelper
 	bool	BeginChildWithPos(const char* Label, ImVec2 Size, bool Border, ImVec2 Pos);
 	void	TextWithBox(const char* Text, ImVec2 Pos, bool IsTextDisabilited);
 	void	SameLineMax(int index, ImGuiStyle& style, size_t maxItemCount, float window_visible_x2, float xSize);
-
+	void	ImageCentered(ImTextureID user_texture_id, ImVec2 imageSize);
 }

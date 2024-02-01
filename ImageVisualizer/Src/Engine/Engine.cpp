@@ -200,7 +200,6 @@ bool Engine::ShouldQuit()
 void Engine::Render()
 {
     auto const visualizer = new App::Visualizer();
-
     while (!bDone)
     {
         if (ShouldQuit() == true) break;
@@ -232,7 +231,7 @@ void Engine::Render()
 
         pSwapChain->Present(1, 0);
     }
-    visualizer->threadForCheckDir.join();
+    visualizer->threadfolderCheck.join();
 }
 
 void Engine::CleanUp()

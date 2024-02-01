@@ -59,3 +59,25 @@ void ImGuiHelper::SameLineMax(int index,ImGuiStyle& style,size_t maxItemCount, f
 	if (index + 1 < maxItemCount && next_button_x2 < window_visible_x2)
 		ImGui::SameLine();
 }
+
+void ImGuiHelper::ImageCentered(ImTextureID user_texture_id, ImVec2 imageSize)
+{
+	float alignment = 0.5f;
+
+	ImGuiStyle& style = ImGui::GetStyle();
+
+	float sizeX = imageSize.x + style.FramePadding.x * 2.0f;
+	float sizeY = imageSize.y + style.FramePadding.y * 2.0f;
+	float availX = ImGui::GetContentRegionAvail().x;
+	float availY = ImGui::GetContentRegionAvail().y;
+
+	float offX = (availX - sizeX) * alignment;
+	float offY = (availY - sizeY) * alignment;
+	if (offX > 0.0f && offY > 0.0f)
+	{
+		//ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off);
+		ImGui::SetCursorPos({ ImGui::GetCursorPosX() + offX ,ImGui::GetCursorPosY() + offY });
+	}
+
+	ImGui::Image(user_texture_id, imageSize);
+}

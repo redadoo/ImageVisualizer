@@ -23,13 +23,13 @@ struct ImageFile
 	std::string					name;
 	std::filesystem::path		path;
 	bool						errorOnLoadImage;
-	ID3D11ShaderResourceView*	image;
+	ID3D11ShaderResourceView*	image = NULL;
 	int							my_image_width = 0;
 	int							my_image_height = 0;
 
 	void InitImage()
 	{
 		errorOnLoadImage = !LoadTextureFromFile(path.string().c_str(), &image, &my_image_width, &my_image_height);
-		std::cout << my_image_width << "    " << my_image_height;
+		std::cout << my_image_width << "    " << my_image_height << std::endl;
 	}
 };

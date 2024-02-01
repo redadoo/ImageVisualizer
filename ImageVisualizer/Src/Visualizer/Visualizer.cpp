@@ -4,7 +4,10 @@ using namespace App;
 
 void Visualizer::CheckFolder()
 {
-	std::string path = ReadFilePath();
+	std::unique_lock<std::mutex> lock(pathFolderMutex);
+	cv.wait(lock, [this] { return pathUpdated; });
+	std::cout << "ora va\n";
+	std::string path = currentFolder;
 
 	std::cout << "watching " << path << " for changes...\n";
 
@@ -30,10 +33,9 @@ void Visualizer::CheckFolder()
 		FILE_NOTIFY_CHANGE_LAST_WRITE,
 		NULL, &overlapped, NULL);
 
-	while (true) {
-
+	while (true) 
+	{
 		DWORD result = WaitForSingleObject(overlapped.hEvent, 0);
-
 		if (result == WAIT_OBJECT_0) {
 			DWORD bytes_transferred;
 			GetOverlappedResult(file, &overlapped, &bytes_transferred, FALSE);
@@ -43,32 +45,32 @@ void Visualizer::CheckFolder()
 			for (;;) 
 			{
 				DWORD name_len = event->FileNameLength / sizeof(wchar_t);
-
-				switch (event->Action) 
+				isFolderChange.store(false, std::memory_order::memory_order_relaxed);
+				switch (event->Action)
 				{
 					case FILE_ACTION_ADDED: {
 						wprintf(L"       Added: %.*s\n", name_len, event->FileName);
-						SetIsFolderChanged(true);
+						haveFolderHaveChanged.store(true, std::memory_order_release);
 					} break;
 
 					case FILE_ACTION_REMOVED: {
 						wprintf(L"     Removed: %.*s\n", name_len, event->FileName);
-						SetIsFolderChanged(true);
+						haveFolderHaveChanged.store(true, std::memory_order_release);
 					} break;
 
 					case FILE_ACTION_MODIFIED: {
 						wprintf(L"    Modified: %.*s\n", name_len, event->FileName);
-						SetIsFolderChanged(true);
+						haveFolderHaveChanged.store(true, std::memory_order_release);
 					} break;
 
 					case FILE_ACTION_RENAMED_OLD_NAME: {
 						wprintf(L"Renamed from: %.*s\n", name_len, event->FileName);
-						SetIsFolderChanged(true);
+						haveFolderHaveChanged.store(true, std::memory_order_release);
 					} break;
 
 					case FILE_ACTION_RENAMED_NEW_NAME: {
 						wprintf(L"          to: %.*s\n", name_len, event->FileName);
-						SetIsFolderChanged(true);
+						haveFolderHaveChanged.store(true, std::memory_order_release);
 					} break;
 
 					default: {
@@ -98,15 +100,25 @@ void Visualizer::CheckFolder()
 
 void Visualizer::StartUpPage()
 {
-
 	ImGui::SetNextWindowSize({ 1280, 800 }, ImGuiCond_Once);
 	ImGui::Begin("app", &StartUpPageDraw, ImGuiWindowFlags_NoCollapse);
 	{
 		SearchFlag();
 		
+		if (haveFolderHaveChanged.load(std::memory_order_acquire))
+		{
+			scanAndAddImageFiles();
+			haveFolderHaveChanged.store(false, std::memory_order_release);
+		}
 
-		if (ImGuiHelper::InputTextWithPos("Folder to visualize", &tmpPath, { 200, 85 }, ImGuiInputTextFlags_EnterReturnsTrue) || GetIsFolderChanged())
+		if (ImGuiHelper::InputTextWithPos("Folder to visualize", &tmpPath, { 200, 85 }, ImGuiInputTextFlags_EnterReturnsTrue))
 			SearchFolder();
+		
+		if (realTimeChange && !threadfolderCheck.joinable())
+			threadfolderCheck = std::thread(&Visualizer::CheckFolder, this);
+
+		if (dirPathIsCorrect)
+			ShowFile();
 		
 		if (openWindows)
 			ShowImage();
@@ -114,10 +126,6 @@ void Visualizer::StartUpPage()
 		ShowError();
 
 		ImGui::Separator();
-
-		if (dirPathIsCorrect)
-			ShowFile();
-
 	}
 	ImGui::End();
 }
@@ -125,7 +133,7 @@ void Visualizer::StartUpPage()
 void Visualizer::ShowError()
 {
 	if (!dirPathIsCorrect)
-		ImGuiHelper::TextWithPos("path not found", { 80, 50 }, false);
+		ImGui::Text("path not found");
 }
 
 void Visualizer::AddFilesVector(std::filesystem::path path)
@@ -150,39 +158,28 @@ void Visualizer::SearchFlag()
 
 void Visualizer::SearchFolder()
 {
-
-	if (FolderToVisualize != tmpPath || GetIsFolderChanged())
+	std::filesystem::path correct_path = std::filesystem::u8path(tmpPath);
+	if (exists_file(correct_path.string()))
 	{
-		std::cout << "cambi \n";
+		SetPath(tmpPath);
+		std::cout << "mon amur\n";
 
-		if (GetIsFolderChanged())
-			SetIsFolderChanged(false);
-		FolderToVisualize = tmpPath;
-		std::filesystem::path correct_path = std::filesystem::u8path(FolderToVisualize);
-
-		if (exists_file(correct_path.string()))
+		dirPathIsCorrect = true;
+		Imagefiles.clear();
+		try
 		{
-			if (realTimeChange)
-			{
-				threadForCheckDir = std::thread(&Visualizer::CheckFolder, this);
-			}
-
-			dirPathIsCorrect = true;
-
-			try
-			{
-				for (const auto& entry : std::filesystem::directory_iterator(correct_path))
-					AddFilesVector(entry);
-			}
-			catch (const std::exception& e) {
-				std::cerr << "Error: " << e.what() << std::endl;
-			}
+			for (const auto& entry : std::filesystem::directory_iterator(correct_path))
+				AddFilesVector(entry);
 		}
-		else
-		{
-			dirPathIsCorrect = false;
+		catch (const std::exception& e) {
+			std::cerr << "Error: " << e.what() << std::endl;
 		}
 	}
+	else
+	{
+		dirPathIsCorrect = false;
+	}
+	
 }
 
 void Visualizer::ShowFile()
@@ -194,7 +191,6 @@ void Visualizer::ShowFile()
 	for (int n = 0; n < Imagefiles.size(); n++)
 	{
 		ImageFile entry = Imagefiles.at(n);
-
 		ImGui::ImageButton("##image", entry.image, buttonSize);
 		ImGuiHelper::SameLineMax(n, style, buttons_count, window_visible_x2, buttonSize.x);
 
@@ -216,11 +212,30 @@ bool Visualizer::IsFolderChanged()
 
 void Visualizer::ShowImage()
 {
-	ImGui::SetNextWindowSize({ ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y}, ImGuiCond_Once);
-	ImGui::Begin("visualizer", &openWindows, ImGuiWindowFlags_NoCollapse);
+	int offSetWindowSize = 20;
+
+	ImVec2 imageSize(Imagefiles.at(indexImageToDisplay).my_image_width, Imagefiles.at(indexImageToDisplay).my_image_height);
+	ImGui::Begin("visualizer", &openWindows, ImGuiWindowFlags_AlwaysAutoResize);
 	{
-		ImVec2 imageSize(Imagefiles.at(indexImageToDisplay).my_image_width, Imagefiles.at(indexImageToDisplay).my_image_height);
-		ImGui::Image(Imagefiles.at(indexImageToDisplay).image, imageSize);
+		ImGuiHelper::ImageCentered(Imagefiles.at(indexImageToDisplay).image, imageSize);
 	}
 	ImGui::End();
+}
+
+void Visualizer::scanAndAddImageFiles()
+{
+	Imagefiles.clear();
+	std::filesystem::path correct_path = std::filesystem::u8path(tmpPath);
+	for (const auto& entry : std::filesystem::directory_iterator(correct_path))
+		AddFilesVector(entry);
+}
+
+void Visualizer::SetPath(const std::string& newPath)
+{
+	{
+		std::lock_guard<std::mutex> lock(pathFolderMutex);
+		currentFolder = newPath;
+		pathUpdated = true;
+	}
+	cv.notify_all();
 }

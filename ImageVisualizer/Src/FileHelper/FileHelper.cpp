@@ -63,7 +63,7 @@
 		 case str2int("pic"):
 			 return Image;
 		 case str2int("txt"):
-			 return Image;
+			 return Text;
 		 default:
 			 return None;
 		 }
