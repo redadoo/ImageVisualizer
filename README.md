@@ -7,12 +7,13 @@ ImageVisualizer is a project that aims to create an image visualizer using the I
 ## Features
 
 - **Image Display:** Display images inside a folder 
+- **Real time Displaying:** Display images inside a folder with real time change
 
 ## Features in Development
 
-- **Real time Displaying:** Display images inside a folder with real time change
 - Zoom
 - Add support for more file type (text file, pdf, video)
+- Add file inspect
 
 ## Current file extension supported(using the stb_image.h)
 - JPG 
