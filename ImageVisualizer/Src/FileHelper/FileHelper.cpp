@@ -12,8 +12,9 @@
 /// </returns>
  bool exists_file(const std::string& pathName) 
  {
+    std::string correct_path = std::filesystem::u8path(pathName).string();
 	struct stat buffer;
-	return (stat(pathName.c_str(), &buffer) == 0);
+	return (stat(correct_path.c_str(), &buffer) == 0);
  }
 
 /// <summary>

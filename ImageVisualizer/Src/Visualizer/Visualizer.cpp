@@ -6,12 +6,10 @@ void Visualizer::CheckFolder()
 {
 	std::unique_lock<std::mutex> lock(pathFolderMutex);
 	cv.wait(lock, [this] { return pathUpdated; });
-	std::cout << "ora va\n";
+	
 	std::string path = currentFolder;
-
-	std::cout << "watching " << path << " for changes...\n";
-
 	std::wstring stemp = std::wstring(path.begin(), path.end());
+
 	LPCWSTR sw = stemp.c_str();
 
 	HANDLE file = CreateFile(sw,
@@ -33,7 +31,7 @@ void Visualizer::CheckFolder()
 		FILE_NOTIFY_CHANGE_LAST_WRITE,
 		NULL, &overlapped, NULL);
 
-	while (true) 
+	while (!exitFolderCheck.load(std::memory_order_acquire))
 	{
 		DWORD result = WaitForSingleObject(overlapped.hEvent, 0);
 		if (result == WAIT_OBJECT_0) {
@@ -96,6 +94,7 @@ void Visualizer::CheckFolder()
 
 		}
 	}
+	exitFolderCheck.store(false, std::memory_order_release);
 }
 
 void Visualizer::StartUpPage()
@@ -107,7 +106,7 @@ void Visualizer::StartUpPage()
 		
 		if (haveFolderHaveChanged.load(std::memory_order_acquire))
 		{
-			scanAndAddImageFiles();
+			ScanAndAddImageFiles();
 			haveFolderHaveChanged.store(false, std::memory_order_release);
 		}
 
@@ -116,6 +115,8 @@ void Visualizer::StartUpPage()
 		
 		if (realTimeChange && !threadfolderCheck.joinable())
 			threadfolderCheck = std::thread(&Visualizer::CheckFolder, this);
+		else if (!realTimeChange && threadfolderCheck.joinable())
+			exitFolderCheck.store(true, std::memory_order_release);
 
 		if (dirPathIsCorrect)
 			ShowFile();
@@ -143,7 +144,7 @@ void Visualizer::AddFilesVector(std::filesystem::path path)
 		ImageFile imageFile;
 		imageFile.path = path;
 		imageFile.InitImage();
-		Imagefiles.push_back(imageFile);
+		imageFiles.push_back(imageFile);
 	}
 }
 
@@ -158,22 +159,13 @@ void Visualizer::SearchFlag()
 
 void Visualizer::SearchFolder()
 {
-	std::filesystem::path correct_path = std::filesystem::u8path(tmpPath);
-	if (exists_file(correct_path.string()))
+	if (exists_file(tmpPath))
 	{
 		SetPath(tmpPath);
-		std::cout << "mon amur\n";
-
+		
 		dirPathIsCorrect = true;
-		Imagefiles.clear();
-		try
-		{
-			for (const auto& entry : std::filesystem::directory_iterator(correct_path))
-				AddFilesVector(entry);
-		}
-		catch (const std::exception& e) {
-			std::cerr << "Error: " << e.what() << std::endl;
-		}
+
+		ScanAndAddImageFiles();
 	}
 	else
 	{
@@ -185,12 +177,12 @@ void Visualizer::SearchFolder()
 void Visualizer::ShowFile()
 {
 	ImGuiStyle& style = ImGui::GetStyle();
-	size_t buttons_count = Imagefiles.size();
+	size_t buttons_count = imageFiles.size();
 	float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
 	ImVec2 buttonSize = { 80,50 };
-	for (int n = 0; n < Imagefiles.size(); n++)
+	for (int n = 0; n < imageFiles.size(); n++)
 	{
-		ImageFile entry = Imagefiles.at(n);
+		ImageFile entry = imageFiles.at(n);
 		ImGui::ImageButton("##image", entry.image, buttonSize);
 		ImGuiHelper::SameLineMax(n, style, buttons_count, window_visible_x2, buttonSize.x);
 
@@ -210,21 +202,32 @@ bool Visualizer::IsFolderChanged()
 	return false;
 }
 
-void Visualizer::ShowImage()
+void Visualizer::ClearImage()
 {
-	int offSetWindowSize = 20;
-
-	ImVec2 imageSize(Imagefiles.at(indexImageToDisplay).my_image_width, Imagefiles.at(indexImageToDisplay).my_image_height);
-	ImGui::Begin("visualizer", &openWindows, ImGuiWindowFlags_AlwaysAutoResize);
+	for (auto& imageFile : imageFiles)
 	{
-		ImGuiHelper::ImageCentered(Imagefiles.at(indexImageToDisplay).image, imageSize);
+		imageFile.ReleaseResources();
 	}
-	ImGui::End();
+	imageFiles.clear();
 }
 
-void Visualizer::scanAndAddImageFiles()
+void Visualizer::ShowImage()
 {
-	Imagefiles.clear();
+	//int offSetWindowSize = 20;
+
+	//ImVec2 imageSize(imageFiles.at(indexImageToDisplay).my_image_width, imageFiles.at(indexImageToDisplay).my_image_height);
+	//ImGui::Begin("visualizer", &openWindows, ImGuiWindowFlags_AlwaysAutoResize);
+	//{
+	//	ImGuiHelper::ImageCentered(imageFiles.at(indexImageToDisplay).image, imageSize);
+	//}
+	//ImGui::End();
+}
+
+void Visualizer::ScanAndAddImageFiles()
+{
+	if (imageFiles.size() > 0)
+		ClearImage();
+
 	std::filesystem::path correct_path = std::filesystem::u8path(tmpPath);
 	for (const auto& entry : std::filesystem::directory_iterator(correct_path))
 		AddFilesVector(entry);

@@ -30,6 +30,7 @@ namespace App
 
 		private:
 			std::atomic<bool>						haveFolderHaveChanged{ false };
+			std::atomic<bool>						exitFolderCheck{ false };
 			std::mutex								pathFolderMutex;
 			std::condition_variable					cv;
 			bool									pathUpdated = false;
@@ -48,17 +49,18 @@ namespace App
 			std::string								tmpPath;
 			std::string								currentFolder;
 
-			std::vector<ImageFile>					Imagefiles;
+			std::vector<ImageFile>					imageFiles;
 
 
 			void ShowFile();
 			void ShowError();
 			void ShowImage();
 			void SearchFlag();
+			void ClearImage();
 			void CheckFolder();
 			void SearchFolder();
 			bool IsFolderChanged();
-			void scanAndAddImageFiles();
+			void ScanAndAddImageFiles();
 			void AddFilesVector(std::filesystem::path path);
 			void SetPath(const std::string& newPath);
 	};

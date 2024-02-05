@@ -231,7 +231,6 @@ void Engine::Render()
 
         pSwapChain->Present(1, 0);
     }
-    visualizer->threadfolderCheck.join();
 }
 
 void Engine::CleanUp()

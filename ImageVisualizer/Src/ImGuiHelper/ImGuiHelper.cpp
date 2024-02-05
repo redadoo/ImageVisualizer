@@ -8,7 +8,6 @@ void ImGuiHelper::ColorBox(const char* label, ImVec2 Size, ImVec2 Pos)
 
 void ImGuiHelper::TextWithPos(const char* Text, ImVec2 Pos, bool IsTextDisabilited)
 {
-
 	ImGui::SetCursorPos(Pos);
 	if (IsTextDisabilited)
 		ImGui::TextDisabled(Text);

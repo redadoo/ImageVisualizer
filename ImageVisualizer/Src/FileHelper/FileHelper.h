@@ -30,6 +30,15 @@ struct ImageFile
 	void InitImage()
 	{
 		errorOnLoadImage = !LoadTextureFromFile(path.string().c_str(), &image, &my_image_width, &my_image_height);
-		std::cout << my_image_width << "    " << my_image_height << std::endl;
 	}
+
+	void ReleaseResources()
+	{
+		if (image)
+		{
+			image->Release();
+			image = nullptr;
+		}
+	}
+
 };
