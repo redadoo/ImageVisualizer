@@ -58,3 +58,15 @@ void ImGuiHelper::ImageCentered(ImTextureID user_texture_id, ImVec2 imageSize)
 
 	ImGui::Image(user_texture_id, imageSize);
 }
+
+void ImGuiHelper::HelpMarker(const char* desc)
+{
+	ImGui::TextDisabled("(?)");
+	if (ImGui::BeginItemTooltip())
+	{
+		ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+		ImGui::TextUnformatted(desc);
+		ImGui::PopTextWrapPos();
+		ImGui::EndTooltip();
+	}
+}

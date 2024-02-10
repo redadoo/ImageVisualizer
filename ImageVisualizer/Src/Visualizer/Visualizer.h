@@ -69,10 +69,11 @@ class Visualizer
 		void ShowFile();
 
 		/// <summary>
-		/// show on the main page this flags:
-		/// <para> Real time visualization : enable this flag to see live changes to the folder </para> 
+		/// show on the main page this flags/buttons:
+		/// <para> - Real time visualization : enable this flag to see live changes to the folder </para>
+		/// <para> - x button : close program </para>
 		/// </summary>
-		void DisplayFlag();
+		void DisplayButtonAndFlag();
 
 		/// <summary>
 		/// open a imgui window for show images in real size

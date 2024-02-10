@@ -21,13 +21,11 @@ void Visualizer::ShowMainPage()
 	ImGui::SetNextWindowSize({ 1280, 800 }, ImGuiCond_Once);
 	ImGui::Begin("app");
 
-	DisplayFlag();
-
-	closeMainPage = ImGuiHelper::ButtonWithPos(" x ", { 30,30 }, { ImGui::GetContentRegionMax().x - 30, 30 });
+	DisplayButtonAndFlag();
 
 	ManageRealTimeThread();
 
-	if (ImGuiHelper::InputTextWithPos("Folder to visualize", &tmpPath, { 220, 75 }, ImGuiInputTextFlags_EnterReturnsTrue))
+	if (ImGuiHelper::InputTextWithPos("Folder to visualize", &tmpPath, { 230, 27.5 }, ImGuiInputTextFlags_EnterReturnsTrue))
 		SearchFolder();
 
 	if (dirPathIsCorrect)
@@ -44,10 +42,14 @@ void Visualizer::ShowMainPage()
 	ImGui::End();
 }
 
-void Visualizer::DisplayFlag()
+void Visualizer::DisplayButtonAndFlag()
 {
+	ImGuiHelper::HelpMarker("Enable this field to see the change within the folder in real time (file removed, file added, file name changed)"); ImGui::SameLine();
 	ImGui::Text("Real time visualization"); ImGui::SameLine();
 	ImGui::Checkbox("##checkRealTime", &realTimeChange);
+
+	closeMainPage = ImGuiHelper::ButtonWithPos("x", { 20,20 }, { ImGui::GetContentRegionMax().x - 20, 27 });
+
 }
 
 void Visualizer::ManageRealTimeThread()

@@ -36,7 +36,7 @@ namespace ImGuiHelper
 	/// <param name="buf :">Pointer to the string to store the input text.</param>
 	/// <param name="Pos :">The position of the input field.</param>
 	/// <param name="flag :">Optional flags for the input field.</param>
-	/// <returns>True if the input field content has changed, otherwise false.</returns>
+	/// <returns>True if the input field content has changed, otherwise false(can change as the ImGuiInputTextFlags_ varies).</returns>
 	bool	InputTextWithPos(const char* label, char* buf, size_t size, ImVec2 Pos, ImGuiInputTextFlags_ flag = ImGuiInputTextFlags_None);
 	
 	/// <summary>
@@ -46,7 +46,7 @@ namespace ImGuiHelper
 	/// <param name="str :">Pointer to the string to store the input text.</param>
 	/// <param name="Pos :">The position of the input field.</param>
 	/// <param name="flag :">Optional flags for the input field.</param>
-	/// <returns>True if the input field content has changed, otherwise false.</returns>
+	/// <returns>True if the input field content has changed, otherwise false(can change as the ImGuiInputTextFlags_ varies).</returns>
 	bool	InputTextWithPos(const char* label, std::string* str, ImVec2 Pos, ImGuiInputTextFlags_ flag);
 
 	/// <summary>
@@ -69,5 +69,11 @@ namespace ImGuiHelper
 	/// <param name="window_visible_x2 :">The right position of the visible window.</param>
 	/// <param name="xSize :">The size of the item.</param>
 	void	SameLineMax(size_t index, ImGuiStyle& style, size_t maxItemCount, float window_visible_x2, float xSize);
+
+	/// <summary>
+	/// Helper to display a little (?) mark which shows a tooltip when hovered
+	/// </summary>
+	/// <param name="desc"></param>
+	void HelpMarker(const char* desc);
 
 }
