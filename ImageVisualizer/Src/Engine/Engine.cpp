@@ -190,7 +190,9 @@ bool Engine::ShouldQuit()
     }
 
     if (GetAsyncKeyState(VK_END) & 1)
+    {
         bDone = true;
+    }
 
     if (bDone)
         return true;
@@ -199,25 +201,26 @@ bool Engine::ShouldQuit()
 
 void Engine::Render()
 {
-    auto const visualizer = new App::Visualizer();
+
+    auto const visualizer = new Visualizer();
+
     while (!bDone)
     {
-        if (ShouldQuit() == true) break;
+
+        if (ShouldQuit() == true || visualizer->isMainPageClosed()) break;
 
         ImGui_ImplDX11_NewFrame();
         ImGui_ImplWin32_NewFrame();
 
         ImGui::NewFrame();
-        visualizer->StartUpPage();
-        //ImGui::ShowDemoWindow();
         ImGui::End();
-
+        visualizer->ShowMainPage();
+        //ImGui::ShowDemoWindow();
+        ImGui::Render();
         ImGui::EndFrame();
 
-        ImGui::Render();
-
         const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
-
+        
         pd3dDeviceContext->OMSetRenderTargets(1, &pMainRenderTargetView, nullptr);
         pd3dDeviceContext->ClearRenderTargetView(pMainRenderTargetView, clear_color_with_alpha);
 
@@ -231,6 +234,7 @@ void Engine::Render()
 
         pSwapChain->Present(1, 0);
     }
+    delete visualizer;
 }
 
 void Engine::CleanUp()

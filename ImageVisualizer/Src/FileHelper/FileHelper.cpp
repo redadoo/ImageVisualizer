@@ -75,10 +75,10 @@
  /// <summary>
  /// Loads a texture from a file using the STB Image library and creates a Direct3D 11 shader resource view.
  /// </summary>
- /// <param name="filename">The file path of the image to be loaded.</param>
- /// <param name="out_srv">A pointer to a pointer that will store the created ID3D11ShaderResourceView.</param>
- /// <param name="out_width">A pointer to an integer that will store the width of the loaded image.</param>
- /// <param name="out_height">A pointer to an integer that will store the height of the loaded image.</param>
+ /// <param name="filename:">The file path of the image to be loaded.</param>
+ /// <param name="out_srv:">A pointer to a pointer that will store the created ID3D11ShaderResourceView.</param>
+ /// <param name="out_width:">A pointer to an integer that will store the width of the loaded image.</param>
+ /// <param name="out_height:">A pointer to an integer that will store the height of the loaded image.</param>
  /// <returns>
  /// Returns true if the texture is successfully loaded and the shader resource view is created;
  /// otherwise, returns false and outputs the failure reason to the standard output.
@@ -130,4 +130,9 @@
      stbi_image_free(image_data);
 
      return true;
+ }
+
+ std::string GetFileName(std::string const& path)
+ {
+     return path.substr(path.find_last_of("/\\") + 1);
  }

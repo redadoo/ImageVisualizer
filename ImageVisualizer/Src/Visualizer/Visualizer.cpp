@@ -1,6 +1,104 @@
 #include "Visualizer.h"
 
-using namespace App;
+
+Visualizer::Visualizer()
+{
+	imageWindow = false;
+	isFolderChange = false;
+	dirPathIsCorrect = true;
+	pathUpdated = false;
+	exitFolderCheck = false;
+	haveFolderHaveChanged = false;
+}
+
+Visualizer::~Visualizer()
+{
+
+}
+
+void Visualizer::ShowMainPage()
+{
+	ImGui::SetNextWindowSize({ 1280, 800 }, ImGuiCond_Once);
+	ImGui::Begin("app");
+
+	DisplayFlag();
+
+	closeMainPage = ImGuiHelper::ButtonWithPos(" x ", { 30,30 }, { ImGui::GetContentRegionMax().x - 30, 30 });
+
+	ManageRealTimeThread();
+
+	if (ImGuiHelper::InputTextWithPos("Folder to visualize", &tmpPath, { 220, 75 }, ImGuiInputTextFlags_EnterReturnsTrue))
+		SearchFolder();
+
+	if (dirPathIsCorrect)
+		ShowFile();
+	
+	if (imageWindow)
+		ShowImage();
+
+	if (!dirPathIsCorrect)
+		ImGui::Text("path not found");
+
+	ImGui::Separator();
+
+	ImGui::End();
+}
+
+void Visualizer::DisplayFlag()
+{
+	ImGui::Text("Real time visualization"); ImGui::SameLine();
+	ImGui::Checkbox("##checkRealTime", &realTimeChange);
+}
+
+void Visualizer::ManageRealTimeThread()
+{
+	if (realTimeChange)
+	{
+		if (!threadfolderCheck.joinable())
+			threadfolderCheck = std::thread(&Visualizer::CheckFolder, this);
+
+		if (haveFolderHaveChanged.load(std::memory_order_acquire))
+		{
+			ScanAndAddImageFiles(true);
+			haveFolderHaveChanged.store(false, std::memory_order_release);
+		}
+	}
+	else if (!realTimeChange && threadfolderCheck.joinable())
+		exitFolderCheck.store(true, std::memory_order_release);
+}
+
+void Visualizer::SearchFolder()
+{
+	dirPathIsCorrect = exists_file(tmpPath);
+	if (dirPathIsCorrect)
+		ScanAndAddImageFiles(false);
+}
+
+void Visualizer::ShowFile()
+{
+	ImVec2		buttonSize = { 80,50 };
+	ImGuiStyle& style = ImGui::GetStyle();
+	size_t		buttons_count = imageFiles.size();
+
+	for (size_t n = 0; n < buttons_count; n++)
+	{
+		ImageFile entry = imageFiles.at(n);
+		ImVec2 currentCurPos = ImGui::GetCursorPos();
+
+		ImGui::ImageButton("##image", entry.image, buttonSize);
+		ImGuiHelper::SameLineMax(n, style, buttons_count, ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x, buttonSize.x);
+
+		if (ImGui::IsItemClicked())
+		{
+			imageWindow = true;
+			indexImageToDisplay = n;
+			return;
+		}
+
+		ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + 160);
+		ImGuiHelper::TextWithPos(entry.name.c_str(), { currentCurPos.x,currentCurPos.y + buttonSize.y + 10 }, false);
+	}
+}
 
 void Visualizer::CheckFolder()
 {
@@ -97,140 +195,57 @@ void Visualizer::CheckFolder()
 	exitFolderCheck.store(false, std::memory_order_release);
 }
 
-void Visualizer::StartUpPage()
+void Visualizer::ShowImage()
 {
-	ImGui::SetNextWindowSize({ 1280, 800 }, ImGuiCond_Once);
-	ImGui::Begin("app", &StartUpPageDraw, ImGuiWindowFlags_NoCollapse);
+	int offSetWindowSize = 20;
+
+	ImVec2 imageSize(imageFiles.at(indexImageToDisplay).my_image_width, imageFiles.at(indexImageToDisplay).my_image_height);
+	ImGui::Begin(imageFiles.at(indexImageToDisplay).name.c_str(), &imageWindow, ImGuiWindowFlags_AlwaysAutoResize);
 	{
-		SearchFlag();
-		
-		if (haveFolderHaveChanged.load(std::memory_order_acquire))
+		ImageFile imageFile;
+		imageFile = imageFiles.at(indexImageToDisplay);
+		ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
+		ImGui::BeginTabBar("ImageBar", tab_bar_flags);
+
+		if (ImGui::BeginTabItem("Image"))
 		{
-			ScanAndAddImageFiles();
-			haveFolderHaveChanged.store(false, std::memory_order_release);
+			ImGuiHelper::ImageCentered(imageFile.image, imageSize);
+			ImGui::EndTabItem();
 		}
-
-		if (ImGuiHelper::InputTextWithPos("Folder to visualize", &tmpPath, { 200, 85 }, ImGuiInputTextFlags_EnterReturnsTrue))
-			SearchFolder();
-		
-		if (realTimeChange && !threadfolderCheck.joinable())
-			threadfolderCheck = std::thread(&Visualizer::CheckFolder, this);
-		else if (!realTimeChange && threadfolderCheck.joinable())
-			exitFolderCheck.store(true, std::memory_order_release);
-
-		if (dirPathIsCorrect)
-			ShowFile();
-		
-		if (openWindows)
-			ShowImage();
-
-		ShowError();
-
-		ImGui::Separator();
+		if (ImGui::BeginTabItem("Info"))
+		{
+			std::string sizeText;
+			sizeText = "Image size is : " + std::to_string(imageFile.my_image_height) + " x " + std::to_string(imageFile.my_image_width);
+			
+			ImGui::Text(imageFile.name.c_str());
+			ImGui::Text(imageFile.path.string().c_str());
+			ImGui::Text(sizeText.c_str());
+			ImGui::EndTabItem();
+		}
 	}
 	ImGui::End();
 }
 
-void Visualizer::ShowError()
+void Visualizer::ScanAndAddImageFiles(bool isFolderModified)
 {
-	if (!dirPathIsCorrect)
-		ImGui::Text("path not found");
-}
+	SetPath(tmpPath);
 
-void Visualizer::AddFilesVector(std::filesystem::path path)
-{
-	if (GetFileType(path.string()) == Image)
-	{
-		ImageFile imageFile;
-		imageFile.path = path;
-		imageFile.InitImage();
-		imageFiles.push_back(imageFile);
-	}
-}
-
-void Visualizer::SearchFlag()
-{
-	ImGui::Text("Debug mode"); ImGui::SameLine();
-	ImGui::Checkbox("##checkDebugMode", &debugModeIsOn);
-	ImGui::Text("Real time visualization"); ImGui::SameLine();
-	ImGui::Checkbox("##checkRealTime", &realTimeChange);
-	ImGui::Separator();
-}
-
-void Visualizer::SearchFolder()
-{
-	if (exists_file(tmpPath))
-	{
-		SetPath(tmpPath);
-		
-		dirPathIsCorrect = true;
-
-		ScanAndAddImageFiles();
-	}
-	else
-	{
-		dirPathIsCorrect = false;
-	}
-	
-}
-
-void Visualizer::ShowFile()
-{
-	ImGuiStyle& style = ImGui::GetStyle();
-	size_t buttons_count = imageFiles.size();
-	float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
-	ImVec2 buttonSize = { 80,50 };
-	for (int n = 0; n < imageFiles.size(); n++)
-	{
-		ImageFile entry = imageFiles.at(n);
-		ImGui::ImageButton("##image", entry.image, buttonSize);
-		ImGuiHelper::SameLineMax(n, style, buttons_count, window_visible_x2, buttonSize.x);
-
-		if (ImGui::IsItemClicked()) 
-		{
-			openWindows = true;
-			indexImageToDisplay = n;
-
-			return;
-		}
-
-	}
-}
-
-bool Visualizer::IsFolderChanged()
-{
-	return false;
-}
-
-void Visualizer::ClearImage()
-{
-	for (auto& imageFile : imageFiles)
-	{
-		imageFile.ReleaseResources();
-	}
-	imageFiles.clear();
-}
-
-void Visualizer::ShowImage()
-{
-	//int offSetWindowSize = 20;
-
-	//ImVec2 imageSize(imageFiles.at(indexImageToDisplay).my_image_width, imageFiles.at(indexImageToDisplay).my_image_height);
-	//ImGui::Begin("visualizer", &openWindows, ImGuiWindowFlags_AlwaysAutoResize);
-	//{
-	//	ImGuiHelper::ImageCentered(imageFiles.at(indexImageToDisplay).image, imageSize);
-	//}
-	//ImGui::End();
-}
-
-void Visualizer::ScanAndAddImageFiles()
-{
+	std::cout << imageFiles.size() << "no \n";
 	if (imageFiles.size() > 0)
-		ClearImage();
+		imageFiles.clear();
 
 	std::filesystem::path correct_path = std::filesystem::u8path(tmpPath);
 	for (const auto& entry : std::filesystem::directory_iterator(correct_path))
-		AddFilesVector(entry);
+	{
+		if (GetFileType(entry.path().string()) == Image)
+		{
+			ImageFile imageFile;
+			imageFile.path = entry.path();
+			imageFile.name = GetFileName(entry.path().string());
+			imageFile.InitImage();
+			imageFiles.push_back(imageFile);
+		}
+	}
 }
 
 void Visualizer::SetPath(const std::string& newPath)

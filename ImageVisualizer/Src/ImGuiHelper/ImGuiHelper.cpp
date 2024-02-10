@@ -1,11 +1,5 @@
 #include "ImGuiHelper.h"
 
-void ImGuiHelper::ColorBox(const char* label, ImVec2 Size, ImVec2 Pos)
-{
-	ImGui::SetCursorPos(Pos);
-	ImGui::Selectable(label, true, ImGuiSelectableFlags_Disabled, Size);
-}
-
 void ImGuiHelper::TextWithPos(const char* Text, ImVec2 Pos, bool IsTextDisabilited)
 {
 	ImGui::SetCursorPos(Pos);
@@ -27,36 +21,20 @@ bool ImGuiHelper::InputTextWithPos(const char* label, std::string* str, ImVec2 P
 	return ImGui::InputText(label, str, flag);
 }
 
-bool ImGuiHelper::CheckBoxWithPos(const char* label, bool* v, ImVec2 Pos)
-{
-	ImGui::SetCursorPos(Pos);
-	return ImGui::Checkbox(label, v);
-}
-
 bool ImGuiHelper::ButtonWithPos(const char* Label, ImVec2 Size, ImVec2 Pos)
 {
 	ImGui::SetCursorPos(Pos);
 	return ImGui::Button(Label, Size);
 }
 
-bool ImGuiHelper::BeginChildWithPos(const char* Label, ImVec2 Size, bool Border, ImVec2 Pos)
-{
-	ImGui::SetCursorPos(Pos);
-	return ImGui::BeginChild(Label, Size, Border);
-}
-
-void ImGuiHelper::TextWithBox(const char* Text, ImVec2 Pos, bool IsTextDisabilited)
-{
-	ImGui::Selectable("##test", true, ImGuiSelectableFlags_Disabled);
-	ImGuiHelper::TextWithPos(Text, Pos, IsTextDisabilited);
-}
-
-void ImGuiHelper::SameLineMax(int index,ImGuiStyle& style,size_t maxItemCount, float window_visible_x2,float xSize)
+void ImGuiHelper::SameLineMax(size_t index,ImGuiStyle& style,size_t maxItemCount, float window_visible_x2,float xSize)
 {
 	float last_button_x2 = ImGui::GetItemRectMax().x;
 	float next_button_x2 = last_button_x2 + style.ItemSpacing.x + xSize;
 	if (index + 1 < maxItemCount && next_button_x2 < window_visible_x2)
+	{
 		ImGui::SameLine();
+	}
 }
 
 void ImGuiHelper::ImageCentered(ImTextureID user_texture_id, ImVec2 imageSize)
