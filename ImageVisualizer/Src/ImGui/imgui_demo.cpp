@@ -4083,12 +4083,12 @@ static void ShowDemoWindowTables()
         // [Method 1] Using TableNextRow() to create a new row, and TableSetColumnIndex() to select the column.
         // In many situations, this is the most flexible and easy to use pattern.
         HelpMarker("Using TableNextRow() + calling TableSetColumnIndex() _before_ each cell, in a loop.");
-        if (ImGui::BeginTable("table1", 3))
+        if (ImGui::BeginTable("table1", 4))
         {
-            for (int row = 0; row < 4; row++)
+            for (int row = 0; row < 3; row++)
             {
                 ImGui::TableNextRow();
-                for (int column = 0; column < 3; column++)
+                for (int column = 0; column < 4; column++)
                 {
                     ImGui::TableSetColumnIndex(column);
                     ImGui::Text("Row %d Column %d", row, column);

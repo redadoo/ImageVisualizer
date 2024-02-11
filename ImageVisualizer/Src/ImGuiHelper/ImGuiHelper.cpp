@@ -70,3 +70,10 @@ void ImGuiHelper::HelpMarker(const char* desc)
 		ImGui::EndTooltip();
 	}
 }
+
+bool ImGuiHelper::ComboWithPos(const char* const items[], const char* name, ImVec2 pos, float width, int* index, int size)
+{
+	ImGui::SetCursorPos(pos);
+	ImGui::PushItemWidth(width);
+	return ImGui::Combo(name, index, items, size);
+}

@@ -74,6 +74,8 @@ namespace ImGuiHelper
 	/// Helper to display a little (?) mark which shows a tooltip when hovered
 	/// </summary>
 	/// <param name="desc"></param>
-	void HelpMarker(const char* desc);
+	void	HelpMarker(const char* desc);
+
+	bool	ComboWithPos(const char* const items[], const char* name, ImVec2 pos, float width, int* index, int size);
 
 }

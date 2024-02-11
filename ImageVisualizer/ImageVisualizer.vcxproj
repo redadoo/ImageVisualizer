@@ -146,6 +146,7 @@
     <ClCompile Include="Src\ImGui\imgui_impl_win32.cpp" />
     <ClCompile Include="Src\ImGui\imgui_stdlib.cpp" />
     <ClCompile Include="Src\ImGui\imgui_tables.cpp" />
+    <ClCompile Include="Src\ImGui\imgui_themes.cpp" />
     <ClCompile Include="Src\ImGui\imgui_widgets.cpp" />
     <ClCompile Include="Src\Main.cpp" />
     <ClCompile Include="Src\Visualizer\Visualizer.cpp" />
@@ -156,6 +157,7 @@
     <ClInclude Include="Src\ImGuiHelper\ImGuiHelper.h" />
     <ClInclude Include="Src\ImGui\imconfig.h" />
     <ClInclude Include="Src\ImGui\imgui.h" />
+    <ClInclude Include="Src\ImGui\Imgui_themes.h" />
     <ClInclude Include="Src\ImGui\imgui_impl_dx11.h" />
     <ClInclude Include="Src\ImGui\imgui_impl_dx9.h" />
     <ClInclude Include="Src\ImGui\imgui_impl_win32.h" />
@@ -167,6 +169,9 @@
     <ClInclude Include="Src\stb\stb_image.h" />
     <ClInclude Include="Src\stb\stb_image_resize2.h" />
     <ClInclude Include="Src\Visualizer\Visualizer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Logo\txt_logo.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

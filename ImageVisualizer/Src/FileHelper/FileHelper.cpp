@@ -3,19 +3,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../stb/stb_image.h"
 
-/// <summary>
-/// Checks if a file path exists in the file system.
-/// </summary>
-/// <param name="pathName">A constant reference to a std::string representing the file path to be checked for existence.</param>
-/// <returns>
-/// Returns true if the specified file path exists, and false otherwise.
-/// </returns>
- bool exists_file(const std::string& pathName) 
- {
-    std::string correct_path = std::filesystem::u8path(pathName).string();
-	struct stat buffer;
-	return (stat(correct_path.c_str(), &buffer) == 0);
- }
 
 /// <summary>
 /// Converts a null-terminated string to an unsigned integer using a hash function.
@@ -25,21 +12,19 @@
 /// <returns>
 /// Returns the computed unsigned integer value based on the input string using a hash algorithm.
 /// </returns>
- constexpr unsigned int str2int(const char* str, int h = 0)
+constexpr unsigned int str2int(const char* str, int _h = 0)
+{
+	 return !str[_h] ? 5381 : (str2int(str, _h + 1) * 33) ^ str[_h];
+}
+
+bool exists_file(const std::string& pathName) 
  {
-	 return !str[h] ? 5381 : (str2int(str, h + 1) * 33) ^ str[h];
+    std::string correct_path = std::filesystem::u8path(pathName).string();
+	struct stat buffer;
+	return (stat(correct_path.c_str(), &buffer) == 0);
  }
 
-/// <summary>
-/// Determines the file type based on the provided file name's extension.
-/// </summary>
-/// <param name="fileName">A std::string containing the file name with extension.</param>
-/// <returns>
-/// Returns a value of the enum FileType, representing the detected file type.
-/// Possible return values include Image for common image file extensions (jpg, png, tga, bmp, psd, gif, hdr, pic),
-/// and None for file types that are not explicitly handled.
-/// </returns>
- FileType GetFileType(std::string fileName)
+FileType GetFileType(std::string fileName)
  {
 	 size_t dotPosition = fileName.find_last_of(".");
 	 if (dotPosition != std::string::npos)
@@ -72,18 +57,7 @@
 	 return None;
  }
 
- /// <summary>
- /// Loads a texture from a file using the STB Image library and creates a Direct3D 11 shader resource view.
- /// </summary>
- /// <param name="filename:">The file path of the image to be loaded.</param>
- /// <param name="out_srv:">A pointer to a pointer that will store the created ID3D11ShaderResourceView.</param>
- /// <param name="out_width:">A pointer to an integer that will store the width of the loaded image.</param>
- /// <param name="out_height:">A pointer to an integer that will store the height of the loaded image.</param>
- /// <returns>
- /// Returns true if the texture is successfully loaded and the shader resource view is created;
- /// otherwise, returns false and outputs the failure reason to the standard output.
- /// </returns>
- bool LoadTextureFromFile(const char* filename, ID3D11ShaderResourceView** out_srv, int* out_width, int* out_height)
+bool LoadTextureFromFile(const char* filename, ID3D11ShaderResourceView** out_srv, int* out_width, int* out_height)
  {
      // Load from disk into a raw RGBA buffer
      int image_width = 0;
@@ -132,7 +106,25 @@
      return true;
  }
 
- std::string GetFileName(std::string const& path)
+std::string GetFileName(std::string const& path)
  {
      return path.substr(path.find_last_of("/\\") + 1);
  }
+
+bool ReadContentFile(std::string filePath, std::vector<std::string> *content)
+{
+    std::ifstream file(filePath);
+
+    if (!file.is_open()) {
+        std::cerr << "Error opening file!" << std::endl;
+        return false;
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        content->push_back(line);
+    }
+
+    file.close();
+    return true;
+}
