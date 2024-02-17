@@ -1,56 +1,19 @@
 #pragma once
 
+# include "../FileManager/FileManager.h"
+# include "../ImGuiHelper/ImGuiHelper.h"
+# include "../ImGui/Imgui_themes.h"
+# include "../ImGui/imgui_internal.h"
 
-#include "../FileHelper/FileHelper.h"
-#include "../ImGuiHelper/ImGuiHelper.h"
-#include "../ImGui/Imgui_themes.h"
-#include "../ImGui/imgui_internal.h"
-#include <vector>
-#include<iostream>
-#include <mutex>
-#include <atomic>
-#include <thread>
-#include <algorithm>
+#ifndef VISUALIZER_H
+# define VISUALIZER_H
 
-# define PATH_LOGO_TXT "/Users/edoar/Desktop/GitHub/ImageVisualizer/ImageVisualizer/Logo/txt_logo.png"
 
 /* struct declared in FileHelper.h*/
 struct File;
 struct ImageFile; 
 struct TextFile; 
-
-bool LoadTextureFromFile(const char* filename, ID3D11ShaderResourceView** out_srv, int* out_width, int* out_height);
-
-/// <summary>
-///  Represents an different type of file logo.
-/// </summary>
-struct FileLogo
-{
-	int							my_logo_width;
-	int							my_logo_height;
-	ID3D11ShaderResourceView*	logo = NULL;
-
-	FileLogo()
-	{
-		LoadTextureFromFile(PATH_LOGO_TXT, &logo, &my_logo_width, &my_logo_height);
-	}
-
-	void ShowLogo(ImVec2 pos)
-	{
-		ImGui::SetCursorPos(pos);
-		ImGui::Image(logo, ImVec2(60, 60));
-	}
-
-	void ShowLogo()
-	{
-		ImGui::ImageButton(logo, ImVec2(60, 60));
-	}
-};
-
-
-#ifndef VISUALIZER_H
-#define VISUALIZER_H
-
+struct FileLogo;
 
 /// <summary>
 /// The Visualizer class provides functionality for visualizing image files in a specified folder.
@@ -71,85 +34,84 @@ class Visualizer
 		void ShowMainPage();
 
 		/// <summary>
-		/// Gets the status indicating whether the main page is closed.
+		/// Gets the status indicating whether the main page need to be closed.
 		/// </summary>
 		bool isMainPageClosed() { return closeMainPage; }
 
 	private:
-		std::thread								threadfolderCheck;
+		FileManager								fileManager;
+		ImVec2									searchBarPos;
+		float									searchBarSize;
+		
 		size_t									indexFileToDisplay;
+
+		bool									mediaWindow;
+		bool									pathUpdated;
 		bool									showThemeMenu;
 		bool									closeMainPage;
-		bool									pathUpdated;
 		bool									realTimeChange;
-		bool									mediaWindow;
-
 		bool									dirPathIsCorrect;
 
-		std::atomic<bool>						haveFolderHaveChanged;
-		std::atomic<bool>						exitFolderCheck;
-		std::atomic<bool>						isFolderChange;
+		bool									nameOrder;
+		bool									dataCreationOrder;
+		bool									typeOrder;
 
-		std::mutex								pathFolderMutex;
-		std::condition_variable					cv;
-		
+
+		bool									ascending;
+		bool									descending;
+
+		bool									allFileFilter;
+		bool									imageFilter;
+		bool									textFilter;
+
 		std::string								tmpPath;
 		std::string								currentFolder;
 
-		int										indexOrder;
-		int										indexFilter;
-		const char								*filter[3] = { "all file", "image", "text" };
-		const char								*order[3] = { "name", "type", "creation date"};
-
-		FileLogo								fileLogo;
-		std::vector<File>						files;
+		std::vector<File>						fileToShow;
 
 		/// <summary>
-		/// show on the main page file inside folder in the form of button (at the moment only image file is supported)
+		/// set position on main window for search bar
 		/// </summary>
-		void ShowFile();
-
+		void	setPosWidget();
+		
 		/// <summary>
-		/// show on the main page this flags/buttons:
-		/// <para> - Real time visualization : enable this flag to see live changes to the folder </para>
-		/// <para> - x button : close program </para>
+		/// show on the main page file inside folder in the form of button (at the moment only image and text file is supported)
 		/// </summary>
-		void DisplayButtonAndFlag();
+		void	ShowFile();
 
+		void	ShowImage();
 
-		void ShowImage();
-
-		void ShowText();
-
+		void	ShowText();
 
 		/// <summary>
 		/// check if path is correct and if so search the folder and init file
 		/// </summary>
-		void SearchFolder();
+		void	SearchFolder();
 	
 		/// <summary>
 		/// Monitors changes in the specified folder and updates the Visualizer accordingly.
 		/// </summary>
-		void CheckFolder();
+		void	CheckFolder();
 
 		/// <summary>
 		/// Manages the real-time thread for checking and updating the folder contents.
 		/// </summary>
-		void ManageRealTimeThread();
+		void	ManageRealTimeThread();
 
 		/// <summary>
 		/// Scans the specified path for image files and adds them to the list of image files.
 		/// </summary>
 		/// <param name="isFolderModified">A boolean indicating if the function is called when something inside the folder is changed.</param>
-		void ScanAndAddFiles(bool isFolderModified);
+		void	ScanAndAddFiles(bool isFolderModified);
 
 		/// <summary>
-		/// This method updates the current folder path for the Visualizer object.
+		/// This method updates the current folder path for the Visualizer.
 		/// <para> It also marks that the path has been updated and notifies all waiting threads</para>
 		/// </summary>
-		void SetPath(const std::string& newPath);
+		void	SetPath(const std::string& newPath);
 
-		void MenuBar();
+		void	MenuBar();
+
 };
 
 #endif

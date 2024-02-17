@@ -1,0 +1,3 @@
+C:/Users/edoar/Desktop/GitHub/ImageVisualizer/cmake-build-debug/CMakeFiles/ImageVisualizer.dir
+C:/Users/edoar/Desktop/GitHub/ImageVisualizer/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/edoar/Desktop/GitHub/ImageVisualizer/cmake-build-debug/CMakeFiles/rebuild_cache.dir

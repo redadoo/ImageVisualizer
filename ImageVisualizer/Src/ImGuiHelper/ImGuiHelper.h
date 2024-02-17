@@ -2,7 +2,7 @@
 
 #include <string>
 #include <iostream>
-
+#include <initializer_list>
 
 #include "../ImGui/imgui.h"
 #include "../ImGui/imgui_stdlib.h"
@@ -37,7 +37,7 @@ namespace ImGuiHelper
 	/// <param name="Pos :">The position of the input field.</param>
 	/// <param name="flag :">Optional flags for the input field.</param>
 	/// <returns>True if the input field content has changed, otherwise false(can change as the ImGuiInputTextFlags_ varies).</returns>
-	bool	InputTextWithPos(const char* label, char* buf, size_t size, ImVec2 Pos, ImGuiInputTextFlags_ flag = ImGuiInputTextFlags_None);
+	bool	InputTextWithPos(const char* label, char* buf, size_t size, ImVec2 Pos, ImGuiInputTextFlags_ flag);
 	
 	/// <summary>
 	/// Displays an input text field at the specified position and allows the user to input text, using ImGui::InputText().
@@ -47,7 +47,7 @@ namespace ImGuiHelper
 	/// <param name="Pos :">The position of the input field.</param>
 	/// <param name="flag :">Optional flags for the input field.</param>
 	/// <returns>True if the input field content has changed, otherwise false(can change as the ImGuiInputTextFlags_ varies).</returns>
-	bool	InputTextWithPos(const char* label, std::string* str, ImVec2 Pos, ImGuiInputTextFlags_ flag);
+	bool	InputTextWithPos(const char* label, std::string* str, ImVec2 Pos, ImGuiInputTextFlags_ flag , bool underText);
 
 	/// <summary>
 	/// Displays an image centered within the available space , using ImGui::Image().
@@ -77,5 +77,8 @@ namespace ImGuiHelper
 	void	HelpMarker(const char* desc);
 
 	bool	ComboWithPos(const char* const items[], const char* name, ImVec2 pos, float width, int* index, int size);
+
+
+	bool	MenuItemSwitchable(const char* label, bool* p_selected, std::initializer_list<bool*> boolPtrList);
 
 }

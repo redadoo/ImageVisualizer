@@ -128,3 +128,36 @@ bool ReadContentFile(std::string filePath, std::vector<std::string> *content)
     file.close();
     return true;
 }
+
+bool Date::operator>(const Date &other) const
+{
+    //int res;
+    //FILETIME test;
+    //FILETIME test1;
+
+    //FileTimeToSystemTime(&test, this->date);
+    //FileTimeToSystemTime(&test1, other.date);
+    //res = CompareFileTime(&test1, &test);
+    //if (res == -1)
+    //    return true;
+    //else
+        return false;
+}
+
+bool Date::operator<(const Date &other) const
+{
+    int res;
+    FILETIME test;
+    FILETIME test1;
+
+    LPSYSTEMTIME date = (LPSYSTEMTIME)&this->date;
+    FileTimeToSystemTime(&test, date);
+    date = (LPSYSTEMTIME)&other.date;
+    FileTimeToSystemTime(&test1, date);
+    res = CompareFileTime(&test, &test1);
+    if (res == -1)
+        return false;
+    else
+        return true;
+
+}

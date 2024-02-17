@@ -1,5 +1,6 @@
 #include "ImGuiHelper.h"
 
+
 void ImGuiHelper::TextWithPos(const char* Text, ImVec2 Pos, bool IsTextDisabilited)
 {
 	ImGui::SetCursorPos(Pos);
@@ -15,10 +16,41 @@ bool ImGuiHelper::InputTextWithPos(const char* label, char* buf, size_t size, Im
 	return ImGui::InputText(label, buf, size, flag);
 }
 
-bool ImGuiHelper::InputTextWithPos(const char* label, std::string* str, ImVec2 Pos, ImGuiInputTextFlags_ flag)
+bool ImGuiHelper::InputTextWithPos(const char* label, std::string* str, ImVec2 Pos, ImGuiInputTextFlags_ flag, bool underText)
 {
+	bool		v;
+	int			xOffset;
+	int			yOffset;
+	std::string	newLabel;
+	size_t		xLenghtUnderText;
+
+	xOffset = 5;
+	yOffset = 3;
+
+	if (underText)
+	{
+		newLabel.append("##");
+		newLabel.append(label);
+		xLenghtUnderText = (newLabel.size() - 2) * 9;
+	}
+	else
+	{
+		newLabel.append(label);
+	}
+
 	ImGui::SetCursorPos(Pos);
-	return ImGui::InputText(label, str, flag);
+	v = ImGui::InputText(newLabel.c_str(), str, flag);
+
+	if (underText && (!ImGui::IsItemFocused() || str->size() < 1))
+	{
+		if (xLenghtUnderText < ImGui::GetItemRectSize().x)
+		{
+			ImGui::SetCursorPos({ Pos.x + xOffset, Pos.y + yOffset});
+			ImGui::TextDisabled(label);
+		}
+	}
+
+	return v;
 }
 
 bool ImGuiHelper::ButtonWithPos(const char* Label, ImVec2 Size, ImVec2 Pos)
@@ -77,3 +109,28 @@ bool ImGuiHelper::ComboWithPos(const char* const items[], const char* name, ImVe
 	ImGui::PushItemWidth(width);
 	return ImGui::Combo(name, index, items, size);
 }
+
+bool ImGuiHelper::MenuItemSwitchable(const char* label, bool* p_selected, std::initializer_list<bool*> boolPtrList)
+{
+	bool v;
+
+	if (*p_selected)
+	{
+		for (auto i : boolPtrList) {
+			*i = false;
+		}
+		return ImGui::MenuItem(label, NULL, true);
+	}
+	else
+	{
+		v = ImGui::MenuItem(label, NULL, p_selected);
+		if (ImGui::IsItemClicked())
+		{
+			for (auto i : boolPtrList) {
+				*i = false;
+			}
+		}
+		return v;
+	}
+}
+
