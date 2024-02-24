@@ -1,9 +1,9 @@
 #include "FileManager.h"
 
 
-bool CompareFileName(const File &a, const File& b) { return a.name < b.name; }
+/* bool CompareFileName(const File &a, const File& b) { return a.name < b.name; }
 bool CompareFileDataCreation(const File& a, const File& b)  { return a.creationTime < b.creationTime; }
-bool CompareFileType(const File& a, const File& b) { return a.type < b.type; }
+bool CompareFileType(const File& a, const File& b) { return a.type < b.type; } */
 
 
 FileManager::FileManager()
@@ -22,9 +22,9 @@ FileManager::~FileManager()
 	delete fileLogo;
 }
 
-bool FileManager::SortFiles(FileOrder _fileOrder, bool ascending, std::vector<File> &fileToShow)
+bool FileManager::SortFiles(FileOrder _fileOrder, bool ascending, std::vector<GenericFile> &fileToShow)
 {
-	if (_fileOrder != fileOrder)
+/* 	if (_fileOrder != fileOrder)
 	{
 		switch (_fileOrder)
 		{
@@ -42,14 +42,14 @@ bool FileManager::SortFiles(FileOrder _fileOrder, bool ascending, std::vector<Fi
 		fileToShow = files;
 		return true;
 	}
-	return false;
+	return false; */
 }
 
 void FileManager::SetFileType(FileType newFileType) { fileType = newFileType; }
 
-void FileManager::GetFiles(std::vector<File> &fileToShow)
+void FileManager::GetFiles(std::vector<GenericFile> &fileToShow)
 {
-	if (fileType != FileType::All)
+/* 	if (fileType != FileType::All)
 	{
 		for (const File &var : files)
 		{
@@ -63,7 +63,7 @@ void FileManager::GetFiles(std::vector<File> &fileToShow)
 	{
 		fileToShow.clear();
 		fileToShow = files;
-	}
+	} */
 }
 
 FileLogo *FileManager::GetFileLogo(){ return fileLogo;}

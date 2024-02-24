@@ -1,3 +1,7 @@
+#pragma once
+
+#ifndef FILEMANAGER_H
+# define FILEMANAGER_H
 
 # include "../FileHelper/FileHelper.h"
 # include <vector>
@@ -7,16 +11,19 @@
 # include <thread>
 # include <mutex>
 # include <atomic>
+# include <condition_variable>
 
-#ifndef FILEMANAGER_H
-# define FILEMANAGER_H
 
-struct File;
-struct ImageFile;
-struct TextFile;
-struct FileLogo;
-enum   FileType;
-enum   FileOrder;
+enum FileOrder
+{
+	NoneFileOrder,
+	Alphabetical,
+	DataCreation,
+	Type
+};
+
+namespace FileHelper {}
+using namespace FileHelper;
 
 class FileManager
 {
@@ -26,25 +33,25 @@ class FileManager
 
 		FileManager();
 		~FileManager();
-		bool				SortFiles(FileOrder _fileOrder, bool ascending, std::vector<File>& fileToShow);
-		void				SetFileType(FileType newFileType);
-		void				GetFiles(std::vector<File> &fileToShow);
-		FileLogo			*GetFileLogo();
-		FileType			GetFileType();
-		void				AddFiles(std::filesystem::directory_entry entry);
-		void				SetPath(const std::string& newPath);
+		bool					SortFiles(FileOrder _fileOrder, bool ascending, std::vector<GenericFile>& fileToShow);
+		void					SetFileType(FileType newFileType);
+		void					GetFiles(std::vector<GenericFile> &fileToShow);
+		FileLogo				*GetFileLogo();
+		FileType				GetFileType();
+		void					AddFiles(std::filesystem::directory_entry entry);
+		void					SetPath(const std::string& newPath);
 	private:
 
-		std::vector<File>		files;
-		FileType				fileType;
-		FileLogo*				fileLogo;
-		FileOrder				fileOrder;
+		std::vector<GenericFile>	files;
+		FileType					fileType;
+		FileLogo*					fileLogo;
+		FileOrder					fileOrder;
 
-		std::atomic<bool>		isFolderChange;
-		std::atomic<bool>		exitFolderCheck;
-		std::atomic<bool>		haveFolderHaveChanged;
+		std::atomic<bool>			isFolderChange;
+		std::atomic<bool>			exitFolderCheck;
+		std::atomic<bool>			haveFolderHaveChanged;
 
-		std::thread				threadfolderCheck;
+		std::thread					threadfolderCheck;
 
 
 };

@@ -8,13 +8,6 @@
 #ifndef VISUALIZER_H
 # define VISUALIZER_H
 
-
-/* struct declared in FileHelper.h*/
-struct File;
-struct ImageFile; 
-struct TextFile; 
-struct FileLogo;
-
 /// <summary>
 /// The Visualizer class provides functionality for visualizing image files in a specified folder.
 /// </summary>
@@ -70,7 +63,7 @@ class Visualizer
 		std::string								tmpPath;
 		std::string								currentFolder;
 
-		std::vector<File>						fileToShow;
+		std::vector<GenericFile>			fileToShow;
 
 		/// <summary>
 		/// set position on main window for search bar

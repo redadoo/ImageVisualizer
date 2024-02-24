@@ -24,7 +24,7 @@ void Visualizer::ShowMainPage()
 	ImGui::SetNextWindowSize({ 1280, 800 }, ImGuiCond_Once);
 	ImGui::Begin("visualizer", nullptr, ImGuiWindowFlags_MenuBar);
 
-	setPosWidget();
+/* 	setPosWidget();
 
 	closeMainPage = ImGuiHelper::ButtonWithPos("x", { 20,20 }, { ImGui::GetContentRegionMax().x - 20, 55 });
 
@@ -41,18 +41,18 @@ void Visualizer::ShowMainPage()
 	
 	if (mediaWindow)
 	{
-		if (fileToShow.at(indexFileToDisplay).type == FileType::Image)
+		if (fileToShow.at(indexFileToDisplay).type == FileType::ImageFileType)
 		{
 			std::cout << "luca\n";
 			ShowImage();
 		}
-		if (fileToShow.at(indexFileToDisplay).type == FileType::Text)
+		if (fileToShow.at(indexFileToDisplay).type == FileType::ImageFileType)
 		{
 			std::cout << "toni\n";
 			ShowText();
 		}
 	}
-
+ */
 	ImGui::End();
 }
 
@@ -73,7 +73,7 @@ void Visualizer::setPosWidget()
 
 void Visualizer::MenuBar()
 {
-	if (ImGui::BeginMenuBar())
+/* 	if (ImGui::BeginMenuBar())
 	{
 		if (ImGui::BeginMenu("options"))
 		{
@@ -131,9 +131,9 @@ void Visualizer::MenuBar()
 			if (ImGuiHelper::MenuItemSwitchable("all file", &allFileFilter, { &imageFilter,&textFilter }))
 				fileType = All;
 			if (ImGuiHelper::MenuItemSwitchable("image", &imageFilter, { &allFileFilter,&textFilter }))
-				fileType = Image;
+				fileType = ImageFileType;
 			if (ImGuiHelper::MenuItemSwitchable("text", &textFilter, { &imageFilter,&allFileFilter }))
-				fileType = Text;
+				fileType = TextFileType;
 			if (fileType != NoneFileType && fileType != fileManager.GetFileType())
 			{
 				fileToShow.clear();
@@ -145,7 +145,7 @@ void Visualizer::MenuBar()
 		}
 		
 		ImGui::EndMenuBar();
-	}
+	} */
 }
 
 void Visualizer::ManageRealTimeThread()
@@ -167,22 +167,22 @@ void Visualizer::ManageRealTimeThread()
 
 void Visualizer::SearchFolder()
 {
-	dirPathIsCorrect = exists_file(tmpPath);
+/* 	dirPathIsCorrect = exists_file(tmpPath);
 	if (dirPathIsCorrect)
-		ScanAndAddFiles(false);
+		ScanAndAddFiles(false); */
 }
 
 void Visualizer::ShowFile()
 {
-	this->fileButtonSize = {80, 50};
+/* 	this->fileButtonSize = {80, 50};
 
 	for (size_t n = 0; n < fileToShow.size(); n++)
 	{
 		const File entry = fileToShow.at(n);
 		
-		if (entry.type == Text)
+		if (entry.type == TextFileType)
 			fileManager.GetFileLogo()->ShowLogo();
-		if (entry.type == Image)
+		if (entry.type == ImageFileType)
 			ImGui::ImageButton("##image", entry.imageFile.image, fileButtonSize);
 		if (ImGui::IsItemClicked())
 		{
@@ -190,7 +190,7 @@ void Visualizer::ShowFile()
 			indexFileToDisplay = n;
 		}
 		ImGuiHelper::SameLineMax(n, ImGui::GetStyle(), fileToShow.size(), ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x, ImGui::GetItemRectSize().x);
-	}
+	} */
 }
 
 void Visualizer::CheckFolder()
@@ -290,7 +290,7 @@ void Visualizer::CheckFolder()
 
 void Visualizer::ShowImage()
 {
-	const ImVec2 imageSize(static_cast<float>(fileToShow.at(indexFileToDisplay).imageFile.my_image_width),
+	/* const ImVec2 imageSize(static_cast<float>(fileToShow.at(indexFileToDisplay).imageFile.my_image_width),
 		static_cast<float>(fileToShow.at(indexFileToDisplay).imageFile.my_image_height));
 	ImGui::Begin(fileToShow.at(indexFileToDisplay).name.c_str(), &mediaWindow, ImGuiWindowFlags_AlwaysAutoResize);
 	{
@@ -313,12 +313,12 @@ void Visualizer::ShowImage()
 			ImGui::EndTabItem();
 		}
 	}
-	ImGui::End();
+	ImGui::End(); */
 }
 
 void Visualizer::ShowText()
 {
-	ImGui::Begin(fileToShow.at(indexFileToDisplay).name.c_str(), &mediaWindow, ImGuiWindowFlags_AlwaysAutoResize);
+	/* ImGui::Begin(fileToShow.at(indexFileToDisplay).name.c_str(), &mediaWindow, ImGuiWindowFlags_AlwaysAutoResize);
 	{
 		const auto& textFile = fileToShow.at(indexFileToDisplay).textFile;
 		ImGui::BeginTabBar("ImageBar", ImGuiTabBarFlags_None);
@@ -341,27 +341,27 @@ void Visualizer::ShowText()
 			ImGui::EndTabItem();
 		}
 	}
-	ImGui::End();
+	ImGui::End(); */
 }
 
 void Visualizer::ScanAndAddFiles(bool isFolderModified)
 {
-	SetPath(tmpPath);
+	/* SetPath(tmpPath);
 
 	fileToShow.clear();
 
 	std::filesystem::path correct_path = std::filesystem::path(tmpPath);
 	for (const auto& entry : std::filesystem::directory_iterator(correct_path))
 		fileManager.AddFiles(entry);
-	fileManager.GetFiles(fileToShow);
+	fileManager.GetFiles(fileToShow); */
 }
 
 void Visualizer::SetPath(const std::string& newPath)
 {
-	{
+	/* {
 		std::lock_guard lock( fileManager.pathFolderMutex);
 		currentFolder = newPath;
 		pathUpdated = true;
 	}
-	fileManager.cv.notify_all();
+	fileManager.cv.notify_all(); */
 }
