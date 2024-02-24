@@ -4,6 +4,41 @@
 #include "../stb/stb_image.h"
 
 
+File::File(std::string _name, std::filesystem::path _path): name(std::move(_name)), path(std::move(_path)), type(GetFileType(name))
+{
+
+	if (type == Image)
+		imageFile = ImageFile(path.string().c_str());
+	else if (type == Text)
+		textFile = TextFile(path.string());
+
+    //GetFileTimeCreation(creationTime);
+	WIN32_FILE_ATTRIBUTE_DATA	fileInfo;
+	if (GetFileAttributesEx(path.string().c_str(), GetFileExInfoStandard, &fileInfo) != 0) {
+
+		FileTimeToSystemTime(&fileInfo.ftLastAccessTime, &lastAccessTime.date);
+		FileTimeToSystemTime(&fileInfo.ftCreationTime, &creationTime.date);
+	}
+	else {
+		DWORD error = GetLastError();
+		std::cerr << "Failed to get file attributes. Error code: " << error << std::endl;
+	}
+
+}
+
+//void GetFileTimeCreation(Date &date)
+//{
+//#ifdef __linux__ 
+//
+//#elif _WIN32
+//
+//#else
+//
+//#endif
+//
+//}
+
+
 /// <summary>
 /// Converts a null-terminated string to an unsigned integer using a hash function.
 /// </summary>
@@ -16,13 +51,46 @@ constexpr unsigned int str2int(const char* str, int _h = 0)
 {
 	 return !str[_h] ? 5381 : (str2int(str, _h + 1) * 33) ^ str[_h];
 }
+    
+ImageFile::ImageFile(const char* path)
+{
+	errorOnLoadImage = !LoadTextureFromFile(path, &image, &my_image_width, &my_image_height);
+}
+
+
+FileLogo::FileLogo()
+{
+	errorOnLoadingImage = !LoadTextureFromFile(PATH_LOGO_TXT, &logo, &my_logo_width, &my_logo_height);
+}
+
+void FileLogo::ShowLogo(const ImVec2 pos) const
+{
+	ImGui::SetCursorPos(pos);
+	ImGui::Image(logo, ImVec2(60, 60));
+}
+
+void FileLogo::ShowLogo() const
+{
+	ImGui::ImageButton(logo, ImVec2(60, 60));
+}
+
+FileLogo::~FileLogo()
+{
+	if (!errorOnLoadingImage)
+		logo->Release();
+}
 
 bool exists_file(const std::string& pathName) 
  {
-    std::string correct_path = std::filesystem::u8path(pathName).string();
+    std::string correct_path = std::filesystem::path(pathName).string();
 	struct stat buffer;
 	return (stat(correct_path.c_str(), &buffer) == 0);
  }
+
+TextFile::TextFile(std::string filePath)
+{
+	errorOnReadFile = !ReadContentFile(filePath, &content);
+}
 
 FileType GetFileType(std::string fileName)
  {
@@ -32,29 +100,31 @@ FileType GetFileType(std::string fileName)
 		 std::string fileExtension = fileName.substr(dotPosition + 1);
 		 switch (str2int(fileExtension.c_str()))
 		 {
-		 case str2int("jpg"):
-			 return Image;
-		 case str2int("png"):
-			 return Image;
-		 case str2int("tga"):
-			 return Image;
-		 case str2int("bmp"):
-			 return Image;
-		 case str2int("psd"):
-			 return Image;
-		 case str2int("gif"):
-			 return Image;
-		 case str2int("hdr"):
-			 return Image;
-		 case str2int("pic"):
-			 return Image;
-		 case str2int("txt"):
-			 return Text;
-		 default:
-			 return None;
+		     case str2int("jpg"):
+			     return Image;
+		     case str2int("png"):
+			     return Image;
+		     case str2int("tga"):
+			     return Image;
+		     case str2int("bmp"):
+			     return Image;
+		     case str2int("psd"):
+			     return Image;
+		     case str2int("gif"):
+			     return Image;
+		     case str2int("hdr"):
+			     return Image;
+		     case str2int("pic"):
+			     return Image;
+		     case str2int("txt"):
+			     return Text;
+		     case str2int("ini"):
+		 	    return System;
+		     default:
+			     return NoneFileType;
 		 }
 	 }
-	 return None;
+	 return NoneFileType;
  }
 
 bool LoadTextureFromFile(const char* filename, ID3D11ShaderResourceView** out_srv, int* out_width, int* out_height)
@@ -111,6 +181,16 @@ std::string GetFileName(std::string const& path)
      return path.substr(path.find_last_of("/\\") + 1);
  }
 
+
+void ImageFile::ReleaseResources()
+{
+	if (image != NULL)
+	{
+		image->Release();
+		image = NULL;
+	}
+}
+
 bool ReadContentFile(std::string filePath, std::vector<std::string> *content)
 {
     std::ifstream file(filePath);
@@ -144,20 +224,10 @@ bool Date::operator>(const Date &other) const
         return false;
 }
 
-bool Date::operator<(const Date &other) const
+bool Date::operator<(const Date& other) const
 {
-    int res;
-    FILETIME test;
-    FILETIME test1;
-
-    LPSYSTEMTIME date = (LPSYSTEMTIME)&this->date;
-    FileTimeToSystemTime(&test, date);
-    date = (LPSYSTEMTIME)&other.date;
-    FileTimeToSystemTime(&test1, date);
-    res = CompareFileTime(&test, &test1);
-    if (res == -1)
-        return false;
-    else
-        return true;
-
+    FILETIME ft1, ft2;
+    SystemTimeToFileTime(&this->date, &ft1);
+    SystemTimeToFileTime(&other.date, &ft2);
+    return CompareFileTime(&ft1, &ft2) == -1;
 }

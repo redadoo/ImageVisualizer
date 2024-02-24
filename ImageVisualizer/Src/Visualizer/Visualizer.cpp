@@ -16,13 +16,13 @@ Visualizer::Visualizer()
 
 Visualizer::~Visualizer()
 {
-
+	
 }
 
 void Visualizer::ShowMainPage()
 {
 	ImGui::SetNextWindowSize({ 1280, 800 }, ImGuiCond_Once);
-	ImGui::Begin("visualizer", NULL, ImGuiWindowFlags_MenuBar);
+	ImGui::Begin("visualizer", nullptr, ImGuiWindowFlags_MenuBar);
 
 	setPosWidget();
 
@@ -56,6 +56,8 @@ void Visualizer::ShowMainPage()
 	ImGui::End();
 }
 
+bool Visualizer::isMainPageClosed() const { return closeMainPage; }
+
 void Visualizer::setPosWidget()
 {
 	//handle search bar resizing with window
@@ -81,13 +83,12 @@ void Visualizer::MenuBar()
 			{
 				for (int i = 0; i < ImGuiThemes::ThemesCount; i++)
 				{
-					ImGuiThemes::Themes theme;
-					theme = ImGuiThemes::IndexToTheme(i);
+					const ImGuiThemes::Themes theme = ImGuiThemes::IndexToTheme(i);
 
 					const char* name = ImGuiThemes::ThemesToString(theme);
 					if (name != NULL && ImGui::MenuItem(name))
 					{
-						ImGuiThemes::InitTheme(ImGuiThemes::IndexToTheme(i));
+						InitTheme(ImGuiThemes::IndexToTheme(i));
 					}
 				}
 				ImGui::EndMenu();
@@ -96,7 +97,7 @@ void Visualizer::MenuBar()
 			ImGui::SeparatorText("search flags");
 			ImGuiHelper::HelpMarker("Enable this field to see the change within the folder in real time (file removed, file added, file name changed)"); ImGui::SameLine();
 			
-			if (ImGui::MenuItem("Realtime visualization", NULL, &realTimeChange)) {}
+			if (ImGui::MenuItem("Realtime visualization", nullptr, &realTimeChange)) {}
 			
 			ImGui::Separator();
 			
@@ -112,28 +113,28 @@ void Visualizer::MenuBar()
 			ImGui::PushItemFlag(ImGuiItemFlags_SelectableDontClosePopup, true);
 			ImGuiHelper::MenuItemSwitchable("ascending", &ascending, { &descending });
 			ImGuiHelper::MenuItemSwitchable("descending", &descending, { &ascending });
+			ImGui::Separator();
 			if (ImGuiHelper::MenuItemSwitchable("name", &nameOrder, { &dataCreationOrder ,&typeOrder }))
 				fileManager.SortFiles(FileOrder::Alphabetical, ascending, fileToShow);
 			if (ImGuiHelper::MenuItemSwitchable("Data creation", &dataCreationOrder, { &nameOrder, &typeOrder }))
 				fileManager.SortFiles(FileOrder::DataCreation, ascending, fileToShow);
 			if (ImGuiHelper::MenuItemSwitchable("type", &typeOrder, { &nameOrder, &dataCreationOrder }))
 				fileManager.SortFiles(FileOrder::Type, ascending , fileToShow);
-			ImGui::Separator();
 			ImGui::PopItemFlag();
 			ImGui::EndMenu();
 		}
 		
 		if (ImGui::BeginMenu("filter by"))
 		{
-			FileType fileType = FileType::None;
+			FileType fileType = NoneFileType;
 			ImGui::PushItemFlag(ImGuiItemFlags_SelectableDontClosePopup, true);
 			if (ImGuiHelper::MenuItemSwitchable("all file", &allFileFilter, { &imageFilter,&textFilter }))
-				fileType = FileType::All;
+				fileType = All;
 			if (ImGuiHelper::MenuItemSwitchable("image", &imageFilter, { &allFileFilter,&textFilter }))
-				fileType = FileType::Image;
+				fileType = Image;
 			if (ImGuiHelper::MenuItemSwitchable("text", &textFilter, { &imageFilter,&allFileFilter }))
-				fileType = FileType::Text;
-			if (fileType != FileType::None && fileType != fileManager.GetFileType())
+				fileType = Text;
+			if (fileType != NoneFileType && fileType != fileManager.GetFileType())
 			{
 				fileToShow.clear();
 				fileManager.SetFileType(fileType);
@@ -173,23 +174,22 @@ void Visualizer::SearchFolder()
 
 void Visualizer::ShowFile()
 {
-	ImVec2		buttonSize = { 80,50 };
-	ImGuiStyle& style = ImGui::GetStyle();
-	size_t		filesSize = fileToShow.size();
+	this->fileButtonSize = {80, 50};
 
-	for (size_t n = 0; n < filesSize; n++)
+	for (size_t n = 0; n < fileToShow.size(); n++)
 	{
-		File entry = fileToShow.at(n);
-		if (entry.type == FileType::Text)
+		const File entry = fileToShow.at(n);
+		
+		if (entry.type == Text)
 			fileManager.GetFileLogo()->ShowLogo();
-		else if (entry.type == FileType::Image)
-			ImGui::ImageButton("##image", entry.imageFile.image, buttonSize);
+		if (entry.type == Image)
+			ImGui::ImageButton("##image", entry.imageFile.image, fileButtonSize);
 		if (ImGui::IsItemClicked())
 		{
 			mediaWindow = true;
 			indexFileToDisplay = n;
 		}
-		ImGuiHelper::SameLineMax(n, style, filesSize, ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x, ImGui::GetItemRectSize().x);
+		ImGuiHelper::SameLineMax(n, ImGui::GetStyle(), fileToShow.size(), ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x, ImGui::GetItemRectSize().x);
 	}
 }
 
@@ -290,14 +290,12 @@ void Visualizer::CheckFolder()
 
 void Visualizer::ShowImage()
 {
-	int offSetWindowSize = 20;
-	
-	ImVec2 imageSize((float)fileToShow.at(indexFileToDisplay).imageFile.my_image_width, (float)fileToShow.at(indexFileToDisplay).imageFile.my_image_height);
+	const ImVec2 imageSize(static_cast<float>(fileToShow.at(indexFileToDisplay).imageFile.my_image_width),
+		static_cast<float>(fileToShow.at(indexFileToDisplay).imageFile.my_image_height));
 	ImGui::Begin(fileToShow.at(indexFileToDisplay).name.c_str(), &mediaWindow, ImGuiWindowFlags_AlwaysAutoResize);
 	{
-		auto& imageFile = fileToShow.at(indexFileToDisplay).imageFile;
-		ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
-		ImGui::BeginTabBar("ImageBar", tab_bar_flags);
+		const auto& imageFile = fileToShow.at(indexFileToDisplay).imageFile;
+		ImGui::BeginTabBar("ImageBar", ImGuiTabBarFlags_None);
 
 		if (ImGui::BeginTabItem("Image"))
 		{
@@ -306,7 +304,7 @@ void Visualizer::ShowImage()
 		}
 		if (ImGui::BeginTabItem("Info"))
 		{
-			std::string sizeText = std::to_string(fileToShow.at(indexFileToDisplay).fileSize);
+			const std::string sizeText = std::to_string(fileToShow.at(indexFileToDisplay).fileSize);
 
 			ImGui::Text(fileToShow.at(indexFileToDisplay).name.c_str());
 			ImGui::Text(fileToShow.at(indexFileToDisplay).path.string().c_str());
@@ -320,12 +318,10 @@ void Visualizer::ShowImage()
 
 void Visualizer::ShowText()
 {
-	int offSetWindowSize = 20;
 	ImGui::Begin(fileToShow.at(indexFileToDisplay).name.c_str(), &mediaWindow, ImGuiWindowFlags_AlwaysAutoResize);
 	{
-		auto& textFile = fileToShow.at(indexFileToDisplay).textFile;
-		ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
-		ImGui::BeginTabBar("ImageBar", tab_bar_flags);
+		const auto& textFile = fileToShow.at(indexFileToDisplay).textFile;
+		ImGui::BeginTabBar("ImageBar", ImGuiTabBarFlags_None);
 
 		if (ImGui::BeginTabItem("Text"))
 		{
@@ -341,8 +337,7 @@ void Visualizer::ShowText()
 
 			ImGui::Text(fileToShow.at(indexFileToDisplay).name.c_str());
 			ImGui::Text(fileToShow.at(indexFileToDisplay).path.string().c_str());
-			ImGui::Text(fileToShow.at(indexFileToDisplay).path.string().c_str());
-			ImGui::Text("byte size %s", sizeText);
+			ImGui::Text("byte size %s", sizeText.c_str());
 			ImGui::EndTabItem();
 		}
 	}
@@ -355,7 +350,7 @@ void Visualizer::ScanAndAddFiles(bool isFolderModified)
 
 	fileToShow.clear();
 
-	std::filesystem::path correct_path = std::filesystem::u8path(tmpPath);
+	std::filesystem::path correct_path = std::filesystem::path(tmpPath);
 	for (const auto& entry : std::filesystem::directory_iterator(correct_path))
 		fileManager.AddFiles(entry);
 	fileManager.GetFiles(fileToShow);
@@ -364,7 +359,7 @@ void Visualizer::ScanAndAddFiles(bool isFolderModified)
 void Visualizer::SetPath(const std::string& newPath)
 {
 	{
-		std::lock_guard<std::mutex> lock( fileManager.pathFolderMutex);
+		std::lock_guard lock( fileManager.pathFolderMutex);
 		currentFolder = newPath;
 		pathUpdated = true;
 	}

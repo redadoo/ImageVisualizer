@@ -2,7 +2,7 @@
 
 
 bool CompareFileName(const File &a, const File& b) { return a.name < b.name; }
-bool CompareFileDataCreation(const File& a, const File& b)  { return a.creationTime < a.creationTime; }
+bool CompareFileDataCreation(const File& a, const File& b)  { return a.creationTime < b.creationTime; }
 bool CompareFileType(const File& a, const File& b) { return a.type < b.type; }
 
 
@@ -70,4 +70,7 @@ FileLogo *FileManager::GetFileLogo(){ return fileLogo;}
 
 FileType FileManager::GetFileType() { return fileType; }
 
-void FileManager::AddFiles(std::filesystem::directory_entry entry) { files.push_back({ GetFileName(entry.path().string()), entry.path() }); }
+void FileManager::AddFiles(std::filesystem::directory_entry entry)
+{
+	files.push_back({ GetFileName(entry.path().string()), entry.path() });
+}

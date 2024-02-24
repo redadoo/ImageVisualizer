@@ -1,17 +1,16 @@
 #pragma once
 
 
-
 #include <Winsock2.h>
 #include <Windows.h>
 #include <tchar.h>
 #include "d3d11.h"
-#include "../ImGui/imgui.h"
 #include "../ImGui/imgui_impl_dx11.h"
 #include "../ImGui/imgui_impl_win32.h"
+#include "../ImGui/imgui.h"
+#include "../Visualizer/Visualizer.h"
 #include <string>
 #include <iostream>
-#include "../Visualizer/Visualizer.h"
 #include <thread>
 #include <mutex>
 
@@ -45,6 +44,7 @@ public:
 	inline static bool bDone = false;
 	inline static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+	static void InitValues();
 	static void Render();
 	static void InitEngine();
 	static void CleanUp();

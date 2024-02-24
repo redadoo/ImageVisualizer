@@ -1,11 +1,16 @@
-#define _WIN32_WINNT 0x0601
-#pragma comment(lib, "crypt32")
-#pragma comment(lib, "ws2_32.lib")
+#ifdef __linux__
 
-#define WIN32_LEAN_AND_MEAN
-#define _HAS_STD_BYTE 0
-#include "Engine/Engine.h"
+#include "Engine/EngineLinux.h"
+int main()
+{
+    Engine::InitEngine();
+    Engine::Render();
+    Engine::CleanUp();
+}
 
+#elif _WIN32
+
+#include "Engine/EngineWin32.h"
 /// <summary>
 ///  function to attach a console to the programm (for debug purpose)
 /// </summary>
@@ -27,3 +32,4 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     Engine::CleanUp();
 }
 
+#endif 

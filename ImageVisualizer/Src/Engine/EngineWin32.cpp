@@ -1,5 +1,4 @@
-#include "Engine.h"
-
+#include "EngineWin32.h"
 
 ID3D11Device*           Engine::pd3dDevice = nullptr;
 ID3D11DeviceContext*    Engine::pd3dDeviceContext = nullptr;
@@ -122,7 +121,6 @@ LRESULT WINAPI Engine::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
     return ::DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
-
 void Engine::InitEngine()
 {
     ImGui_ImplWin32_EnableDpiAwareness();
@@ -140,6 +138,12 @@ void Engine::InitEngine()
     ::ShowWindow(hwnd, SW_HIDE);
     ::UpdateWindow(hwnd);
 
+    const HMONITOR monitor = MonitorFromWindow(Engine::hwnd, MONITOR_DEFAULTTONEAREST);
+    MONITORINFO info = {};
+    info.cbSize = sizeof(MONITORINFO);
+    GetMonitorInfo(monitor, &info);
+    const int monitor_height = info.rcMonitor.bottom - info.rcMonitor.top;
+
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -156,11 +160,8 @@ void Engine::InitEngine()
         style.Colors[ImGuiCol_WindowBg].w = 1.0f;
     }
 
-    const HMONITOR monitor = MonitorFromWindow(Engine::hwnd, MONITOR_DEFAULTTONEAREST);
-    MONITORINFO info = {};
-    info.cbSize = sizeof(MONITORINFO);
-    GetMonitorInfo(monitor, &info);
-    const int monitor_height = info.rcMonitor.bottom - info.rcMonitor.top;
+    ImGui_ImplWin32_Init(hwnd);
+    ImGui_ImplDX11_Init(pd3dDevice, pd3dDeviceContext);
 
     if (monitor_height > 1080)
     {
@@ -171,10 +172,6 @@ void Engine::InitEngine()
     }
 
     ImGui::GetIO().IniFilename = nullptr;
-
-    ImGui_ImplWin32_Init(hwnd);
-    ImGui_ImplDX11_Init(pd3dDevice, pd3dDeviceContext);
-
     ConfFlags = io.ConfigFlags;
 }
 
@@ -201,7 +198,6 @@ bool Engine::ShouldQuit()
 
 void Engine::Render()
 {
-
     auto const visualizer = new Visualizer();
 
     while (!bDone)
@@ -217,10 +213,9 @@ void Engine::Render()
         visualizer->ShowMainPage();
         //ImGui::ShowDemoWindow();
         ImGui::Render();
-        ImGui::EndFrame();
 
         const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
-        
+
         pd3dDeviceContext->OMSetRenderTargets(1, &pMainRenderTargetView, nullptr);
         pd3dDeviceContext->ClearRenderTargetView(pMainRenderTargetView, clear_color_with_alpha);
 
@@ -233,6 +228,7 @@ void Engine::Render()
         }
 
         pSwapChain->Present(1, 0);
+
     }
     delete visualizer;
 }
@@ -241,6 +237,7 @@ void Engine::CleanUp()
 {
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
+
     ImGui::DestroyContext();
 
     CleanupDeviceD3D();

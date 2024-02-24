@@ -1,11 +1,12 @@
 #pragma once
 
-# include"../Engine/Engine.h"
+# include"../Engine/EngineWin32.h"
 # include <vector>
 # include <functional>
 # include <iostream>
 # include <filesystem>
 # include <fstream>
+# include <chrono>
 
 # define PATH_LOGO_TXT "/Users/edoar/Desktop/GitHub/ImageVisualizer/ImageVisualizer/Logo/txt_logo.png"
 
@@ -17,7 +18,8 @@ enum FileType
 	All,
 	Image,
 	Text,
-	None
+	System,
+	NoneFileType
 };
 
 enum FileOrder
@@ -28,7 +30,7 @@ enum FileOrder
 	Type
 };
 
-struct Date
+struct Date 
 {
 	SYSTEMTIME date;
 
@@ -54,28 +56,19 @@ bool		LoadTextureFromFile(const char* filename, ID3D11ShaderResourceView** out_s
 /// </summary>
 struct ImageFile
 {
-	bool						errorOnLoadImage;
+	ID3D11ShaderResourceView*	image = nullptr;
 	int							my_image_width;
 	int							my_image_height;
-	ID3D11ShaderResourceView*	image = NULL;
+	bool						errorOnLoadImage;
 
-	ImageFile(){}
+	ImageFile() = default;
 
-	ImageFile(const char *path) {
-		errorOnLoadImage = !LoadTextureFromFile(path, &image, &my_image_width, &my_image_height);
-	}
+	ImageFile(const char *path);
 
 	/// <summary>
 	/// Releases any resources associated with the image.
 	/// </summary>
-	void ReleaseResources()
-	{
-		if (image != NULL)
-		{
-			image->Release();
-			image = NULL;
-		}
-	}
+	void ReleaseResources();
 };
 
 /// <summary> Reads content from a file into a vector. </summary>
@@ -90,14 +83,12 @@ bool		ReadContentFile(std::string fileName, std::vector<std::string>* content); 
 /// </summary>
 struct TextFile
 {
-	bool						errorOnReadFile;
 	std::vector<std::string>	content;
+	bool						errorOnReadFile;
 
-	TextFile(){}
+	TextFile() = default;
 
-	TextFile(std::string filePath) {
-		errorOnReadFile = !ReadContentFile(filePath, &content);
-	}
+	TextFile(std::string filePath);
 };
 
 /// <summary>
@@ -119,35 +110,9 @@ struct File
 	ImageFile					imageFile;
 	Date						creationTime;
 	Date						lastAccessTime;
-	ULONGLONG					fileSize;
+	uintmax_t					fileSize;
 
-	File(std::string _name, std::filesystem::path _path) : name(_name), path(_path), type(GetFileType(name)) 
-	{
-
-		if (type == FileType::Image)
-			imageFile = ImageFile(path.string().c_str());
-		else if (type == FileType::Text)
-			textFile = TextFile(path.string());
-
-		WIN32_FILE_ATTRIBUTE_DATA	fileInfo;
-		if (GetFileAttributesEx(path.string().c_str(), GetFileExInfoStandard, &fileInfo) != 0) {
-
-			FileTimeToSystemTime(&fileInfo.ftLastAccessTime, &lastAccessTime.date);
-			FileTimeToSystemTime(&fileInfo.ftCreationTime, &creationTime.date);
-
-			ULARGE_INTEGER ul;
-			ul.HighPart = fileInfo.nFileSizeHigh;
-			ul.LowPart = fileInfo.nFileSizeLow;
-			fileSize = ul.QuadPart;
-		}
-		else {
-			// Failed to get file attributes
-			DWORD error = GetLastError();
-			std::cerr << "Failed to get file attributes. Error code: " << error << std::endl;
-		}
-
-	}
-
+	File(std::string _name, std::filesystem::path _path);
 };
 
 /// <summary>
@@ -155,32 +120,18 @@ struct File
 /// </summary>
 struct FileLogo
 {
+	ID3D11ShaderResourceView*	logo = nullptr;
 	int							my_logo_width;
 	int							my_logo_height;
 	bool						errorOnLoadingImage;
-	ID3D11ShaderResourceView*	logoTxt = NULL;
 
-	FileLogo()
-	{
-		errorOnLoadingImage = !LoadTextureFromFile(PATH_LOGO_TXT, &logoTxt, &my_logo_width, &my_logo_height);
-	}
+	FileLogo();
 
-	void ShowLogo(ImVec2 pos)
-	{
-		ImGui::SetCursorPos(pos);
-		ImGui::Image(logoTxt, ImVec2(60, 60));
-	}
+	void ShowLogo(ImVec2 pos) const;
 
-	void ShowLogo()
-	{
-		ImGui::ImageButton(logoTxt, ImVec2(60, 60));
-	}
+	void ShowLogo() const;
 
-	~FileLogo()
-	{
-		if (!errorOnLoadingImage)
-			logoTxt->Release();
-	}
+	~FileLogo();
 };
 
 /// <summary>

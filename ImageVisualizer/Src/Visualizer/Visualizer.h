@@ -36,13 +36,16 @@ class Visualizer
 		/// <summary>
 		/// Gets the status indicating whether the main page need to be closed.
 		/// </summary>
-		bool isMainPageClosed() { return closeMainPage; }
+		bool isMainPageClosed() const;
 
 	private:
 		FileManager								fileManager;
+
+		//search bar
 		ImVec2									searchBarPos;
 		float									searchBarSize;
-		
+
+		ImVec2									fileButtonSize;
 		size_t									indexFileToDisplay;
 
 		bool									mediaWindow;
@@ -79,6 +82,9 @@ class Visualizer
 		/// </summary>
 		void	ShowFile();
 
+		/// <summary>
+		/// open a window contain the image file 
+		/// </summary>
 		void	ShowImage();
 
 		void	ShowText();
