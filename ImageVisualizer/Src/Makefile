@@ -1,14 +1,14 @@
 NAME 		= visualizer
 
 IMGUI_DIR   = ImGui
-CC			= g++ -std=c++20 -I$(IMGUI_DIR) -I$(IMGUI_DIR)/
-FLAGS		= -Wall -Wextra 
+CC			= clang++ -std=c++20 -I$(IMGUI_DIR) -I$(IMGUI_DIR)/
+FLAGS		= -Wall -Wextra #-ftime-trace
 RM			= rm -rf
 
 OBJDIR      = .objFiles
 
-FILES		=  main Engine/EngineLinux Visualizer/Visualizer FileHelper/FileHelper FileManager/FileManager ImGuiHelper/ImGuiHelper
-FILES       += $(IMGUI_DIR)/imgui $(IMGUI_DIR)/imgui_demo $(IMGUI_DIR)/imgui_draw $(IMGUI_DIR)/imgui_tables $(IMGUI_DIR)/imgui_widgets $(IMGUI_DIR)/imgui_stdlib
+FILES		=  main Engine/EngineLinux Visualizer/Visualizer FileHelper/FileHelper FileManager/FileManager ImGuiHelper/ImGuiHelper 
+FILES       += $(IMGUI_DIR)/imgui $(IMGUI_DIR)/imgui_demo $(IMGUI_DIR)/imgui_draw $(IMGUI_DIR)/imgui_tables $(IMGUI_DIR)/imgui_widgets $(IMGUI_DIR)/imgui_stdlib $(IMGUI_DIR)/imgui_themes
 FILES       += $(IMGUI_DIR)/Backends/imgui_impl_sdl2 $(IMGUI_DIR)/Backends/imgui_impl_opengl3
 
 SRC			= $(FILES:=.cpp)

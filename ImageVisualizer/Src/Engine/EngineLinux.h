@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ENGINE_H
+#define ENGINE_H
 
 #include "../ImGui/imgui.h"
 #include "../ImGui/Backends/imgui_impl_sdl2.h"
@@ -11,19 +12,21 @@
 #include <SDL_opengl.h>
 #endif
 
-
-
 class Engine
 {
 public:
 	void Render();
 	void InitEngine();
 	void CleanUp();
-	bool ShouldQuit();
+	void ShouldQuit();
+
+	bool				done;
+	SDL_Window*			window;
+	SDL_WindowFlags 	windowFlags;
+	ImGuiConfigFlags   	ConfFlags;
+	SDL_GLContext		glContext;
 
 private:
-	SDL_Window*		window;
-	SDL_WindowFlags	window_flags;
-	ImGuiIO io;
-	SDL_GLContext gl_context;
 };
+
+#endif // ENGINE_H

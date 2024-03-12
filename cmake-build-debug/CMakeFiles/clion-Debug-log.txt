@@ -1,1 +1,0 @@
-CMakeLists.txt not found in \\wsl.localhost\Ubuntu\home\edoardo\Desktop\ImageVisualizer Select CMakeLists.txt

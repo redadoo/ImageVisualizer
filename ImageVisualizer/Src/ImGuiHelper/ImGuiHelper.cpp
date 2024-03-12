@@ -5,9 +5,9 @@ void ImGuiHelper::TextWithPos(const char* Text, ImVec2 Pos, bool IsTextDisabilit
 {
 	ImGui::SetCursorPos(Pos);
 	if (IsTextDisabilited)
-		ImGui::TextDisabled(Text);
+		ImGui::TextDisabled("%s", Text);
 	else
-		ImGui::Text(Text);
+		ImGui::Text("%s", Text);
 }
 
 bool ImGuiHelper::InputTextWithPos(const char* label, char* buf, size_t size, ImVec2 Pos, ImGuiInputTextFlags_ flag)
@@ -46,7 +46,7 @@ bool ImGuiHelper::InputTextWithPos(const char* label, std::string* str, ImVec2 P
 		if (xLenghtUnderText < ImGui::GetItemRectSize().x)
 		{
 			ImGui::SetCursorPos({ Pos.x + xOffset, Pos.y + yOffset});
-			ImGui::TextDisabled(label);
+			ImGui::TextDisabled("%s", label);
 		}
 	}
 

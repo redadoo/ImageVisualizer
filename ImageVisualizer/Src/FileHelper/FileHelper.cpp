@@ -8,24 +8,11 @@ using namespace FileHelper;
 
 GenericFile::GenericFile(std::string _name, std::filesystem::path _path): name(std::move(_name)), path(std::move(_path)), type(GetFileType(name))
 {
-
-/* 	if (type == Image)
+	if (type == ImageFileType)
 		imageFile = ImageFile(path.string().c_str());
-	else if (type == Text)
+	else if (type == TextFileType)
 		textFile = TextFile(path.string());
-
-	//GetFileTimeCreation(creationTime);
-	WIN32_FILE_ATTRIBUTE_DATA	fileInfo;
-	if (GetFileAttributesEx(path.string().c_str(), GetFileExInfoStandard, &fileInfo) != 0) {
-
-		FileTimeToSystemTime(&fileInfo.ftLastAccessTime, &lastAccessTime.date);
-		FileTimeToSystemTime(&fileInfo.ftCreationTime, &creationTime.date);
-	}
-	else {
-		DWORD error = GetLastError();
-		std::cerr << "Failed to get file attributes. Error code: " << error << std::endl;
-	} */
-
+	
 }
 
 //void GetFileTimeCreation(Date &date)
@@ -51,148 +38,158 @@ GenericFile::GenericFile(std::string _name, std::filesystem::path _path): name(s
 /// </returns>
 constexpr unsigned int str2int(const char* str, int _h = 0)
 {
-	 return !str[_h] ? 5381 : (str2int(str, _h + 1) * 33) ^ str[_h];
-}
-	
-/* ImageFile::ImageFile(const char* path)
-{
-	errorOnLoadImage = !LoadTextureFromFile(path, &image, &my_image_width, &my_image_height);
-} */
-
-
-FileHelper::FileLogo::FileLogo()
-{
-	/* errorOnLoadingImage = !LoadTextureFromFile(PATH_LOGO_TXT, &logo, &my_logo_width, &my_logo_height); */
+	return !str[_h] ? 5381 : (str2int(str, _h + 1) * 33) ^ str[_h];
 }
 
-void FileHelper::FileLogo::ShowLogo(const ImVec2 pos) const
+ImageFile::ImageFile(const char* path)
 {
-	/* ImGui::SetCursorPos(pos);
-	ImGui::Image(logo, ImVec2(60, 60)); */
+	errorOnLoadImage = !LoadTextureFromFile(path, image, &my_image_width, &my_image_height);
 }
 
-void FileHelper::FileLogo::ShowLogo() const
+
+FileLogo::FileLogo()
 {
-/* 	ImGui::ImageButton(logo, ImVec2(60, 60)); */
+	errorOnLoadingImage = !LoadTextureFromFile(PATH_LOGO_TXT, logo, &my_logo_width, &my_logo_height);
 }
 
-FileHelper::FileLogo::~FileLogo()
+void FileLogo::ShowLogo(const ImVec2 pos) const
 {
-/* 	if (!errorOnLoadingImage)
-		logo->Release(); */
+	(void)pos;
+	ImGui::SetCursorPos(pos);
+	ImGui::Image(logo.GetTexture(), ImVec2(60, 60));
 }
 
-bool exists_file(const std::string& pathName) 
+void FileLogo::ShowLogo() const
 {
-	(void)pathName;
-/* 	std::string correct_path = std::filesystem::path(pathName).string();
-	struct stat buffer;
-	return (stat(correct_path.c_str(), &buffer) == 0); */
-	return true;
+	ImGui::ImageButton(logo.GetTexture(), ImVec2(60, 60));
 }
 
-FileHelper::TextFile::TextFile(std::string filePath)
+FileLogo::~FileLogo()
+{
+
+}
+
+bool FileHelper::exists_file(const std::string pathName)  
+{
+	return std::filesystem::exists(pathName);
+}
+
+TextFile::TextFile(std::string filePath)
 {
 	errorOnReadFile = !ReadContentFile(filePath, &content);
 }
 
 FileType FileHelper::GetFileType(std::string fileName)
- {
-	 size_t dotPosition = fileName.find_last_of(".");
-	 if (dotPosition != std::string::npos)
-	 {
-		 std::string fileExtension = fileName.substr(dotPosition + 1);
-		 switch (str2int(fileExtension.c_str()))
-		 {
-			 case str2int("jpg"):
-				 return ImageFileType;
-			 case str2int("png"):
-				 return ImageFileType;
-			 case str2int("tga"):
-				 return ImageFileType;
-			 case str2int("bmp"):
-				 return ImageFileType;
-			 case str2int("psd"):
-				 return ImageFileType;
-			 case str2int("gif"):
-				 return ImageFileType;
-			 case str2int("hdr"):
-				 return ImageFileType;
-			 case str2int("pic"):
-				 return ImageFileType;
-			 case str2int("txt"):
-				 return ImageFileType;
-			 case str2int("ini"):
-		 		return SystemFileType;
-			 default:
-				 return NoneFileType;
-		 }
-	 }
-	 return NoneFileType;
- }
+{
+	size_t dotPosition = fileName.find_last_of(".");
+	if (dotPosition != std::string::npos)
+	{
+		std::string fileExtension = fileName.substr(dotPosition + 1);
+		switch (str2int(fileExtension.c_str()))
+		{
+			case str2int("jpg"):
+				return ImageFileType;
+			case str2int("png"):
+				return ImageFileType;
+			case str2int("tga"):
+				return ImageFileType;
+			case str2int("bmp"):
+				return ImageFileType;
+			case str2int("psd"):
+				return ImageFileType;
+			case str2int("gif"):
+				return ImageFileType;
+			case str2int("hdr"):
+				return ImageFileType;
+			case str2int("pic"):
+				return ImageFileType;
+			case str2int("txt"):
+				return ImageFileType;
+			case str2int("ini"):
+			return SystemFileType;
+			default:
+				return NoneFileType;
+		}
+	}
+	return NoneFileType;
+}
 
-/* bool LoadTextureFromFile(const char* filename, ID3D11ShaderResourceView** out_srv, int* out_width, int* out_height)
- {
-	 // Load from disk into a raw RGBA buffer
-	 int image_width = 0;
-	 int image_height = 0;
-	 unsigned char* image_data = stbi_load(filename, &image_width, &image_height, NULL, 4);
-	 if (image_data == NULL)
-	 {
-		 std::cout << stbi_failure_reason() << "\n";
-		 return false;
-	 }
+bool FileHelper::LoadTextureFromFile(const char* filename, Image &image, int* out_width, int* out_height)
+{
+	// Load from disk into a raw RGBA buffer
+	int image_width = 0;
+	int image_height = 0;
+	unsigned char* image_data = stbi_load(filename, &image_width, &image_height, NULL, 4);
+	if (image_data == NULL)
+	{
+		std::cout << stbi_failure_reason() << "\n";
+		return false;
+	}
 
-	 // Create texture
-	 D3D11_TEXTURE2D_DESC desc;
-	 ZeroMemory(&desc, sizeof(desc));
-	 desc.Width = image_width;
-	 desc.Height = image_height;
-	 desc.MipLevels = 1;
-	 desc.ArraySize = 1;
-	 desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	 desc.SampleDesc.Count = 1;
-	 desc.Usage = D3D11_USAGE_DEFAULT;
-	 desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	 desc.CPUAccessFlags = 0;
+#ifdef __linux__
+	// Create a OpenGL texture identifier
+	GLuint image_texture;
+	glGenTextures(1, &image_texture);
+	glBindTexture(GL_TEXTURE_2D, image_texture);
 
-	 ID3D11Texture2D* pTexture = NULL;
-	 D3D11_SUBRESOURCE_DATA subResource;
-	 subResource.pSysMem = image_data;
-	 subResource.SysMemPitch = desc.Width * 4;
-	 subResource.SysMemSlicePitch = 0;
-	 Engine::pd3dDevice->CreateTexture2D(&desc, &subResource, &pTexture);
+	// Setup filtering parameters for display
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
 
-	 // Create texture view
-	 D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-	 ZeroMemory(&srvDesc, sizeof(srvDesc));
-	 srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	 srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	 srvDesc.Texture2D.MipLevels = desc.MipLevels;
-	 srvDesc.Texture2D.MostDetailedMip = 0;
-	 Engine::pd3dDevice->CreateShaderResourceView(pTexture, &srvDesc, out_srv);
-	 pTexture->Release();
+	// Upload pixels into texture
+	#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+	#endif
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+	stbi_image_free(image_data);
 
-	 *out_width = image_width;
-	 *out_height = image_height;
-	 stbi_image_free(image_data);
+	image.texture = image_texture;
+	*out_width = image_width;
+	*out_height = image_height;
+#elif _WIN32
+	// Create texture
+	D3D11_TEXTURE2D_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+	desc.Width = image_width;
+	desc.Height = image_height;
+	desc.MipLevels = 1;
+	desc.ArraySize = 1;
+	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	desc.SampleDesc.Count = 1;
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	desc.CPUAccessFlags = 0;
 
-	 return true;
- } */
+	ID3D11Texture2D* pTexture = NULL;
+	D3D11_SUBRESOURCE_DATA subResource;
+	subResource.pSysMem = image_data;
+	subResource.SysMemPitch = desc.Width * 4;
+	subResource.SysMemSlicePitch = 0;
+	Engine::pd3dDevice->CreateTexture2D(&desc, &subResource, &pTexture);
+
+	// Create texture view
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	ZeroMemory(&srvDesc, sizeof(srvDesc));
+	srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = desc.MipLevels;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	Engine::pd3dDevice->CreateShaderResourceView(pTexture, &srvDesc, out_srv);
+	pTexture->Release();
+
+	*out_width = image_width;
+	*out_height = image_height;
+	stbi_image_free(image_data);
+#endif
+
+return true;
+}
 
 std::string FileHelper::GetFileName(std::string const& path)
- {
-	 return path.substr(path.find_last_of("/\\") + 1);
- }
-
-
-void FileHelper::ImageFile::ReleaseResources()
 {
-/* 	if (image != NULL)
-	{
-		image->Release();
-		image = NULL;
-	} */
+	return path.substr(path.find_last_of("/\\") + 1);
 }
 
 bool FileHelper::ReadContentFile(std::string filePath, std::vector<std::string> *content)
@@ -211,4 +208,18 @@ bool FileHelper::ReadContentFile(std::string filePath, std::vector<std::string> 
 
 	file.close();
 	return true;
+}
+
+ImTextureID Image::GetTexture() const
+{
+    return (void*)(intptr_t)this->texture;
+}
+
+void Image::Release()
+{
+	#ifdef __linux__
+		glDeleteTextures(1, &texture);
+	#elif _WIN32
+		texture->release();
+	#endif
 }

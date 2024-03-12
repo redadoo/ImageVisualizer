@@ -1,5 +1,6 @@
-#pragma once
 
+#ifndef ENGINE_H
+#define ENGINE_H
 
 #include <Winsock2.h>
 #include <Windows.h>
@@ -13,9 +14,6 @@
 #include <iostream>
 #include <thread>
 #include <mutex>
-
-#ifndef ENGINE_H
-#define ENGINE_H
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 

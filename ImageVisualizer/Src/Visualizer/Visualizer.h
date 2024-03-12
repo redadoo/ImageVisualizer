@@ -1,12 +1,11 @@
-#pragma once
+
+#ifndef VISUALIZER_H
+# define VISUALIZER_H
 
 # include "../FileManager/FileManager.h"
 # include "../ImGuiHelper/ImGuiHelper.h"
 # include "../ImGui/Imgui_themes.h"
 # include "../ImGui/imgui_internal.h"
-
-#ifndef VISUALIZER_H
-# define VISUALIZER_H
 
 /// <summary>
 /// The Visualizer class provides functionality for visualizing image files in a specified folder.

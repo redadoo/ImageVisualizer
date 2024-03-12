@@ -1,10 +1,15 @@
 #pragma once
 
 #ifdef __linux__
+	#include <fcntl.h>
+	#include <sys/types.h>
+	#include <sys/stat.h>
 	#include <GL/gl.h>
 	#include "../Engine/EngineLinux.h"
+	using ImageTexture = GLuint;
 #elif  _WIN32
 	# include"../Engine/EngineWin32.h"
+	using ImageTexture = ID3D11ShaderResourceView*;
 #endif
 
 # include <vector>
@@ -29,15 +34,23 @@ namespace FileHelper
 		NoneFileType
 	};
 
-	/* bool		LoadTextureFromFile(const char* filename, ID3D11ShaderResourceView** out_srv, int* out_width, int* out_height);
-	*/
+	struct Image
+	{
+    	ImageTexture texture;
+
+		ImTextureID GetTexture() const;
+
+		void Release();
+	};
+
+	bool		LoadTextureFromFile(const char* filename, Image &image, int* out_width, int* out_height);
 
 	/// <summary>
 	/// Represents an image file.
 	/// </summary>
 	struct ImageFile
 	{
-		/* Image						image; */
+		Image						image;
 		int							my_image_width;
 		int							my_image_height;
 		bool						errorOnLoadImage;
@@ -99,7 +112,7 @@ namespace FileHelper
 	/// </summary>
 	struct FileLogo
 	{
-		/* Image						logo; */
+		Image						logo;
 		int							my_logo_width;
 		int							my_logo_height;
 		bool						errorOnLoadingImage;
@@ -118,7 +131,7 @@ namespace FileHelper
 	/// </summary>
 	/// <param name="name :">The name of the file.</param>
 	/// <returns>True if the file exists, otherwise false.</returns>
-	bool		exists_file(const std::string& name);
+	bool		exists_file(const std::string name);
 
 	/// <summary>
 	/// Extracts the file name from the given file path.
