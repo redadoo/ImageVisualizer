@@ -7,10 +7,7 @@
 int main()
 {
  	Engine engine = Engine();
-
-	engine.InitEngine();
-	engine.Render();
-	engine.CleanUp(); 
+	engine.RunEngine();
     
 
 	return 0;

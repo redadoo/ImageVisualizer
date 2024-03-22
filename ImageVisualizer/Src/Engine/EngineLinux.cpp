@@ -43,7 +43,7 @@ void Engine::InitEngine()
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-	windowFlags = (SDL_WindowFlags)(/* SDL_WINDOW_HIDDEN | */ SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+	windowFlags = (SDL_WindowFlags)(SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
 	window = SDL_CreateWindow("Dear ImGui SDL2+OpenGL3 example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, windowFlags);
 	if (window == nullptr)
 	{
@@ -103,6 +103,8 @@ void Engine::Render()
 	while (!done)
 	{
 		ShouldQuit();
+
+        if (vis->isMainPageClosed() == true) break;
 		
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplSDL2_NewFrame();
@@ -138,4 +140,11 @@ void Engine::CleanUp()
 	SDL_GL_DeleteContext(glContext);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
+}
+
+void Engine::RunEngine()
+{
+	InitEngine();
+	Render();
+	CleanUp(); 
 }

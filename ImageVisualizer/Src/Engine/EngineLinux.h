@@ -15,11 +15,7 @@
 class Engine
 {
 public:
-	void Render();
-	void InitEngine();
-	void CleanUp();
-	void ShouldQuit();
-
+	void				RunEngine();
 	bool				done;
 	SDL_Window*			window;
 	SDL_WindowFlags 	windowFlags;
@@ -27,6 +23,11 @@ public:
 	SDL_GLContext		glContext;
 
 private:
+	void Render();
+	void InitEngine();
+	void CleanUp();
+	void ShouldQuit();
+
 };
 
 #endif // ENGINE_H
