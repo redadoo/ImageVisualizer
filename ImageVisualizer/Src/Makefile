@@ -14,36 +14,40 @@ FILES       += $(IMGUI_DIR)/Backends/imgui_impl_sdl2 $(IMGUI_DIR)/Backends/imgui
 SRC			= $(FILES:=.cpp)
 OBJ			= $(addprefix $(OBJDIR)/, $(FILES:=.o))
 HEADER		= stb/stb_image.h Engine/EngineLinux.h $(IMGUI_DIR)/Backends/imgui_impl_sdl2.h $(IMGUI_DIR)/Backends/imgui_impl_opengl3.h $(IMGUI_DIR)/Backends/imgui_impl_opengl3_loader.h Visualizer/Visualizer.h FileHelper/FileHelper.h FileManager/FileManager.h ImGuiHelper/ImGuiHelper.h
-UNAME_S     := $(shell uname -s)
 LINUX_GL_LIBS = -lGL
 
 FLAGS += -g -Wformat
-LIBS = 
 
-ifeq ($(UNAME_S), Linux) #LINUX
+
+ifeq ($(OS),Windows_NT)
+    DETECTED_OS := Windows
+else
+    DETECTED_OS := $(shell uname) 
+endif
+
+
+ifeq ($(DETECTED_OS ), Linux) #LINUX
 	ECHO_MESSAGE = "Linux"
-	LIBS += $(LINUX_GL_LIBS) -ldl `sdl2-config --libs`
+	LIBS = $(LINUX_GL_LIBS) -ldl `sdl2-config --libs`
 
 	FLAGS += `sdl2-config --cflags`
 endif
 
-ifeq ($(UNAME_S), Darwin) #APPLE
+ifeq ($(DETECTED_OS ), Darwin) #APPLE
 	ECHO_MESSAGE = "Mac OS X"
-	LIBS += -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo `sdl2-config --libs`
+	LIBS = -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo `sdl2-config --libs`
 	LIBS += -L/usr/local/lib -L/opt/local/lib
 
 	FLAGS += `sdl2-config --cflags`
 	FLAGS += -I/usr/local/include -I/opt/local/include
 endif
 
-ifeq ($(OS), Windows_NT)
+ifeq ($(DETECTED_OS), Windows)
     ECHO_MESSAGE = "MinGW"
-    LIBS += -lgdi32 -lopengl32 -limm32 `pkg-config --static --libs sdl2`
+    LIBS = -lgdi32 -lopengl32 -limm32 `pkg-config --static --libs sdl2`
 
     CXXFLAGS += `pkg-config --cflags sdl2`
 endif
-
-
 
 .PHONY: all clean fclean re leaks 
 
