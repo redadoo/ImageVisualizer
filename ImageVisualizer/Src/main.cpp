@@ -8,7 +8,5 @@ int main()
 {
  	Engine engine = Engine();
 	engine.RunEngine();
-    
-
 	return 0;
 }
